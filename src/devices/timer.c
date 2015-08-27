@@ -19,8 +19,15 @@
 
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
+
+/*typedef struct{
+  int64_t wakeup_ticks;
+  struct list_elem *elem;
+  struct thread *t;
+}*/
+
+static struct list sleep_list;
 /*static list wakeup_list;
-struct list sleep_list;
  i need new structure for sleeping threads
  */
 
@@ -41,7 +48,7 @@ timer_init (void)
 {
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
-  list_init(&wakeup_list);
+//  list_init(&wakeup_list);
   list_init(&sleep_list);
 }
 
@@ -93,25 +100,39 @@ timer_elapsed (int64_t then)
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
-timer_sleep (int64_t ticks) 
+timer_sleep (int64_t tick) 
 {
   int64_t start = timer_ticks ();
+  struct thread *t=thread_current();
 
   ASSERT (intr_get_level () == INTR_ON);
-  ticks_wakeup = start + ticks;
 
+  enum intr_level old_level = intr_disable ();
+  t->wakeup_ticks= start + tick;
+  list_push_back(&sleep_list,&t->timer_elem);
 
   thread_block();
+  intr_set_level (old_level);
             
 }
 
-
+/* Let sleeping threads wake up.*/
 void
 timer_wakeup (void)
 {
-  int64_t wake = ticks_wakeup;
   int64_t ticks_now = timer_ticks();
-  if (wake < ticks_now) thread_unblock( thread_current() );
+  struct list_elem *e;
+
+  for (e= list_begin (&sleep_list); e != list_end (&sleep_list);
+      e = list_next (e)){
+    struct thread *t = list_entry(e, struct thread,timer_elem);
+
+    if (t->wakeup_ticks <= ticks_now){
+      thread_unblock( t );
+      list_remove(e);
+    }
+
+  }
 
 }
 
