@@ -363,7 +363,6 @@ SHRT_MIN	src/lib/limits.h	19;"	d
 SHUTDOWN_NONE	src/devices/shutdown.h	/^    SHUTDOWN_NONE,              \/* Loop forever. *\/$/;"	e	enum:shutdown_type
 SHUTDOWN_POWER_OFF	src/devices/shutdown.h	/^    SHUTDOWN_POWER_OFF,         \/* Power off the machine (if possible). *\/$/;"	e	enum:shutdown_type
 SHUTDOWN_REBOOT	src/devices/shutdown.h	/^    SHUTDOWN_REBOOT,            \/* Reboot the machine (if possible). *\/$/;"	e	enum:shutdown_type
-SIGVTALRM	src/utils/pintos	/^sub SIGVTALRM {$/;"	s
 SIZE	src/tests/vm/child-linear.c	12;"	d	file:
 SIZE	src/tests/vm/mmap-shuffle.c	12;"	d	file:
 SIZE	src/tests/vm/page-linear.c	9;"	d	file:
@@ -757,6 +756,7 @@ compare_bytes	src/tests/lib.c	/^compare_bytes (const void *read_data_, const voi
 compare_files	src/tests/tests.pm	/^sub compare_files {$/;"	s
 compare_ints	src/tests/internal/stdlib.c	/^compare_ints (const void *a_, const void *b_) $/;"	f	file:
 compare_output	src/tests/tests.pm	/^sub compare_output {$/;"	s
+compare_priority	src/threads/thread.c	/^compare_priority(struct list_elem * a, struct list_elem *b){$/;"	f
 compare_thunk	src/lib/stdlib.c	/^compare_thunk (const void *a, const void *b, void *aux) $/;"	f	file:
 completion_wait	src/devices/ide.c	/^    struct semaphore completion_wait;   \/* Up'd by interrupt handler. *\/$/;"	m	struct:channel	typeref:struct:channel::semaphore	file:
 cond_broadcast	src/threads/synch.c	/^cond_broadcast (struct condition *cond, struct lock *lock) $/;"	f
@@ -1679,6 +1679,7 @@ simple_thread_func	src/tests/threads/priority-preempt.c	/^static thread_func sim
 size	src/devices/block.c	/^    block_sector_t size;                 \/* Size in sectors. *\/$/;"	m	struct:block	file:
 size	src/lib/ustar.c	/^    char size[12];              \/* File size in bytes as octal string. *\/$/;"	m	struct:ustar_header	file:
 size_t	src/lib/stddef.h	/^typedef __SIZE_TYPE__ size_t;$/;"	t
+sleep_list	src/devices/timer.c	/^static struct list sleep_list;$/;"	v	typeref:struct:list	file:
 sleep_test	src/tests/threads/alarm-simultaneous.c	/^struct sleep_test $/;"	s	file:
 sleep_test	src/tests/threads/alarm-wait.c	/^struct sleep_test $/;"	s	file:
 sleep_thread	src/tests/threads/alarm-wait.c	/^struct sleep_thread $/;"	s	file:
@@ -1951,6 +1952,7 @@ time_t	src/devices/rtc.h	/^typedef unsigned long time_t;$/;"	t
 timeout	src/utils/pintos	/^sub timeout {$/;"	s
 timer_calibrate	src/devices/timer.c	/^timer_calibrate (void) $/;"	f
 timer_elapsed	src/devices/timer.c	/^timer_elapsed (int64_t then) $/;"	f
+timer_elem	src/threads/thread.h	/^    struct list_elem timer_elem;$/;"	m	struct:thread	typeref:struct:thread::list_elem
 timer_init	src/devices/timer.c	/^timer_init (void) $/;"	f
 timer_interrupt	src/devices/timer.c	/^static intr_handler_func timer_interrupt;$/;"	v	file:
 timer_interrupt	src/devices/timer.c	/^timer_interrupt (struct intr_frame *args UNUSED)$/;"	f	file:
@@ -1959,10 +1961,11 @@ timer_msleep	src/devices/timer.c	/^timer_msleep (int64_t ms) $/;"	f
 timer_ndelay	src/devices/timer.c	/^timer_ndelay (int64_t ns) $/;"	f
 timer_nsleep	src/devices/timer.c	/^timer_nsleep (int64_t ns) $/;"	f
 timer_print_stats	src/devices/timer.c	/^timer_print_stats (void) $/;"	f
-timer_sleep	src/devices/timer.c	/^timer_sleep (int64_t ticks) $/;"	f
+timer_sleep	src/devices/timer.c	/^timer_sleep (int64_t tick) $/;"	f
 timer_ticks	src/devices/timer.c	/^timer_ticks (void) $/;"	f
 timer_udelay	src/devices/timer.c	/^timer_udelay (int64_t us) $/;"	f
 timer_usleep	src/devices/timer.c	/^timer_usleep (int64_t us) $/;"	f
+timer_wakeup	src/devices/timer.c	/^timer_wakeup (void)$/;"	f
 tolower	src/lib/ctype.h	/^static inline int tolower (int c) { return isupper (c) ? c - 'A' + 'a' : c; }$/;"	f
 too_many_loops	src/devices/timer.c	/^too_many_loops (unsigned loops) $/;"	f	file:
 toupper	src/lib/ctype.h	/^static inline int toupper (int c) { return islower (c) ? c - 'a' + 'A' : c; }$/;"	f
@@ -2051,6 +2054,7 @@ wait_while_busy	src/devices/ide.c	/^wait_while_busy (const struct ata_disk *d) $
 waiters	src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:condition	typeref:struct:condition::list
 waiters	src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:semaphore	typeref:struct:semaphore::list
 wake_time	src/tests/threads/alarm-priority.c	/^static int64_t wake_time;$/;"	v	file:
+wakeup_ticks	src/threads/thread.h	/^    int64_t wakeup_ticks;$/;"	m	struct:thread
 width	src/lib/stdio.c	/^    int width;$/;"	m	struct:printf_conversion	file:
 wrap_open	src/tests/filesys/extended/dir-rm-cwd.c	/^wrap_open (const char *name) $/;"	f	file:
 write	src/devices/block.h	/^    void (*write) (void *aux, block_sector_t, const void *buffer);$/;"	m	struct:block_operations

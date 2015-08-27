@@ -108,7 +108,7 @@ thread_start (void)
   /* Create the idle thread. */
   struct semaphore idle_started;
   sema_init (&idle_started, 0);
-  thread_create ("idle", PRI_MIN, idle, &idle_started);
+  thread_create ("idle", PRI_DEFAULT, idle, &idle_started);
 
   /* Start preemptive thread scheduling. */
   intr_enable ();
@@ -208,7 +208,9 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
-
+  list_sort(&ready_list, compare_priority, NULL);
+  thread_yield();
+  
   return tid;
 }
 
@@ -226,6 +228,23 @@ thread_block (void)
 
   thread_current ()->status = THREAD_BLOCKED;
   schedule ();
+}
+
+/*  compare priroty of a and b
+    check a < b  == true */
+bool
+compare_priority(struct list_elem * a, struct list_elem *b,void *aux){
+  struct thread * thread_a;
+  struct thread * thread_b;
+
+  thread_a = list_entry (a , struct thread , elem);
+  thread_b = list_entry (b , struct thread , elem);
+
+  int pri_a = thread_a->priority;
+  int pri_b = thread_b->priority;
+
+  return pri_a < pri_b;
+
 }
 
 /* Transitions a blocked thread T to the ready-to-run state.
@@ -246,6 +265,7 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
   list_push_back (&ready_list, &t->elem);
+//  list_insert_ordered (&ready_list, &t->elem, compare_priority, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -343,7 +363,15 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+  struct thread *t= thread_current();
+  struct list_elem *e = list_begin(&ready_list);
+  struct thread *begin = list_entry(e, struct thread, elem);
+  t->priority = new_priority;
+  t->priority_origin = new_priority;
+   
+  if( t->priority <= begin->priority) thread_yield();
+
+
 }
 
 /* Returns the current thread's priority. */
@@ -468,6 +496,7 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+  t->priority_origin = priority;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
 }
