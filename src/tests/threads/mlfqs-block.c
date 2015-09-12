@@ -41,6 +41,7 @@ test_mlfqs_block (void)
     continue;
 
   msg ("Main thread releasing lock.");
+
   lock_release (&lock);
 
   msg ("Block thread should have already acquired lock.");
@@ -56,7 +57,6 @@ block_thread (void *lock_)
   start_time = timer_ticks ();
   while (timer_elapsed (start_time) < 20 * TIMER_FREQ)
     continue;
-
   msg ("Block thread acquiring lock...");
   lock_acquire (lock);
 
