@@ -17,9 +17,12 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/synch.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
+
+struct semaphore wait_sema;
 
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
@@ -30,7 +33,7 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-
+  sema_init(&wait_sema,0);
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -42,29 +45,106 @@ process_execute (const char *file_name)
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
+  sema_down(&wait_sema);
   return tid;
+}
+
+void 
+rev_str(char *str)
+{
+  char temp;
+  size_t len = strlen(str) - 1;
+  size_t i;
+  size_t k;
+
+  if (len <2) return;
+
+  k = len;
+  for(i = 0; i < len; i++)
+  {
+    temp = str[k];
+    str[k] = str[i];
+    str[i] = temp;
+    k--;
+
+    /* As 2 characters are changing place for each cycle of the loop
+       only traverse half the array of characters */
+    if(k == (len / 2))
+    {
+      break;
+    }
+  }
 }
 
 /* A thread function that loads a user process and starts it
    running. */
-static void
+  static void
 start_process (void *file_name_)
 {
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success;
+  unsigned int * user_esp;
+  char * sub_BASE;
+  int len;
+  int iter,sub_iter,argc=0;
+  char *token;
+  char *ptr;
+
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
+
   success = load (file_name, &if_.eip, &if_.esp);
+  
+  len = strlen( file_name) + 1;
+  user_esp = if_.esp;
+  sub_BASE = (char *)if_.esp;
+
+  rev_str(file_name); 
+
+  token = strtok_r( file_name, " ", &ptr );
+
+  while ( token ){
+    int length = strlen(token) + 1;
+    user_esp = (char *)user_esp - length;
+    rev_str(token);
+    memcpy ( (void *)user_esp, token, length);
+    argc++;
+    token = strtok_r( NULL, " ", &ptr );
+  }
+
+  user_esp = (unsigned int)user_esp - (unsigned int)user_esp % 4;
+  
+  sub_iter = argc;
+  for (iter = 2 ; sub_iter ; iter ++){
+      if( *(char *)(sub_BASE - iter) == '\0') {
+        user_esp -= 1;
+        *user_esp = (char *)(sub_BASE -iter + 1);
+        sub_iter--;
+      }
+  }
+
+  user_esp -= 1;
+  *user_esp = user_esp + 1;
+
+  user_esp -= 1;
+  *user_esp = argc;
+
+  user_esp -= 1;
+  *user_esp = NULL; // fake ret
+
+  if_.esp = (void *)user_esp;
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
   if (!success) 
     thread_exit ();
+  
+  sema_up(&wait_sema);
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in

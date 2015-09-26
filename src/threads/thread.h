@@ -1,7 +1,6 @@
 #ifndef THREADS_THREAD_H
 #define THREADS_THREAD_H
 
-#include "fixed-point.h"
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
@@ -101,18 +100,6 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
-
-    /* Owned by timer.c */
-    int64_t wakeup_ticks;
-    struct list_elem timer_elem;
-
-    /* save original priority with donation*/
-    struct lock *wait_lock;
-    int priority_origin;
-
-    /* NICE with advanced scheduling */
-    int nice;
-    fixed_p recent_cpu;  
   };
 
 /* If false (default), use round-robin scheduler.
@@ -150,11 +137,5 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
-void calculate_priority_nice(void);
-void calculate_load_avg(void);
 
-bool compare_priority(struct list_elem *, struct list_elem *, void *);
-void check_priority(struct lock *);
-
-extern fixed_p load_avg;
 #endif /* threads/thread.h */
