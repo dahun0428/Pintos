@@ -23,7 +23,6 @@ static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
 struct semaphore wait_sema;
-
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
@@ -33,19 +32,27 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-  sema_init(&wait_sema,0);
+  char *token, *ptr;
+
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
-  fn_copy = palloc_get_page (0);
+  if( is_kernel_vaddr(file_name) )
+    fn_copy = palloc_get_page (0);
+  else fn_copy = palloc_get_page (PAL_USER);
+
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
 
+  token = strtok_r( file_name, " ", &ptr);
+
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  tid = thread_create (token, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
-  sema_down(&wait_sema);
+
+  thread_yield();
+
   return tid;
 }
 
@@ -86,27 +93,34 @@ start_process (void *file_name_)
   bool success;
   unsigned int * user_esp;
   char * sub_BASE;
-  int len;
   int iter,sub_iter,argc=0;
   char *token;
   char *ptr;
+  char *cp_file_name;
 
+  if( is_kernel_vaddr(file_name) )
+    cp_file_name = palloc_get_page (0);
+  else cp_file_name = palloc_get_page (PAL_USER);
 
+  lock_acquire(&thread_current()->child_lock);
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
 
-  success = load (file_name, &if_.eip, &if_.esp);
-  
-  len = strlen( file_name) + 1;
+  strlcpy (cp_file_name , file_name, strlen(file_name)+1);
+
+  token = strtok_r(cp_file_name, " ", &ptr );
+
+  success = load (token, &if_.eip, &if_.esp);
+
+  rev_str(file_name);
+
   user_esp = if_.esp;
   sub_BASE = (char *)if_.esp;
 
-  rev_str(file_name); 
-
-  token = strtok_r( file_name, " ", &ptr );
+  token = strtok_r( file_name, " ", &ptr);
 
   while ( token ){
     int length = strlen(token) + 1;
@@ -118,6 +132,9 @@ start_process (void *file_name_)
   }
 
   user_esp = (unsigned int)user_esp - (unsigned int)user_esp % 4;
+
+  user_esp -= 1;
+  *user_esp = NULL;
   
   sub_iter = argc;
   for (iter = 2 ; sub_iter ; iter ++){
@@ -138,13 +155,15 @@ start_process (void *file_name_)
   *user_esp = NULL; // fake ret
 
   if_.esp = (void *)user_esp;
-
+  
   /* If load failed, quit. */
   palloc_free_page (file_name);
+  palloc_free_page (cp_file_name);
+
   if (!success) 
     thread_exit ();
   
-  sema_up(&wait_sema);
+  //sema_up(&wait_sema);
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -166,9 +185,27 @@ start_process (void *file_name_)
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
 int
-process_wait (tid_t child_tid UNUSED) 
+process_wait (tid_t child_tid) 
 {
-  return -1;
+  int status = -1;
+  struct list_elem * e;
+  struct thread * t;
+  int pid = child_tid;
+
+  for ( e = list_begin(ptr_all_list); e != list_end(ptr_all_list); e= list_next(e)){
+
+    t = list_entry(e, struct thread, allelem);
+    if (pid == t->tid && t->parent == thread_current()){
+
+      lock_acquire(&t->child_lock);
+
+      status = thread_current()->child_status;
+      break;
+    }
+  }
+
+  return status;
+  //return wait(child_tid);
 }
 
 /* Free the current process's resources. */
@@ -177,6 +214,7 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
+
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */

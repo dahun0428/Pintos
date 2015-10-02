@@ -1,7 +1,16 @@
 #ifndef USERPROG_SYSCALL_H
 #define USERPROG_SYSCALL_H
 
+#include "devices/shutdown.h"
+#include "filesys/filesys.h"
+#include "filesys/file.h"
+
 typedef int pid_t;
+struct file_des
+{
+  struct file * file;
+  int fd;
+};
 #define PID_ERROR ((pid_t) -1)
 
 #define bool	_Bool
@@ -9,8 +18,9 @@ typedef int pid_t;
 #define false	0
 #define __bool_true_false_are_defined	1
 
+
 void syscall_init (void);
-/*
+
 void halt(void);
 
 void exit(int);
@@ -30,6 +40,6 @@ int write(int, const void *, unsigned);
 void seek(int, unsigned);
 unsigned tell(int);
 
-void close(int);**/
+void close(int);
 
 #endif /* userprog/syscall.h */

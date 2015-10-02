@@ -27,7 +27,7 @@ static struct list ready_list;
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
-
+struct list * ptr_all_list;
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -92,6 +92,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
+  ptr_all_list = &all_list;
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -183,6 +184,7 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
+  t->parent = thread_current();
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 
@@ -208,6 +210,7 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
+
 
   return tid;
 }
@@ -469,7 +472,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  lock_init(&t->child_lock);
   list_push_back (&all_list, &t->allelem);
+
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
@@ -581,7 +586,21 @@ allocate_tid (void)
 
   return tid;
 }
+
+struct thread * tid2thread(tid_t t){
+  struct list_elem *e;
+
+  for(e = list_begin(&all_list); e != list_end(&all_list);
+        e = list_next(e)){
+    struct thread * walk = list_entry(e, struct thread, allelem);
+    if (walk->tid == t) return walk;
+  }
+
+  return NULL;
+}
 
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+
