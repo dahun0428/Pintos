@@ -33,12 +33,15 @@ process_execute (const char *file_name)
   char *fn_copy;
   tid_t tid;
   char *token, *ptr;
+  struct file * file = NULL;
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   if( is_kernel_vaddr(file_name) )
     fn_copy = palloc_get_page (0);
-  else fn_copy = palloc_get_page (PAL_USER);
+
+  else 
+    fn_copy = palloc_get_page (PAL_USER);
 
   if (fn_copy == NULL)
     return TID_ERROR;
@@ -47,12 +50,18 @@ process_execute (const char *file_name)
   token = strtok_r( file_name, " ", &ptr);
 
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (token, PRI_DEFAULT, start_process, fn_copy);
+  file = filesys_open (file_name);
+  if (file == NULL) return -1;
+
+  else
+    tid = thread_create (token, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
 
-  thread_yield();
-
+  //thread_yield();
+  int i = 10000001;
+  while(i--);
+  
   return tid;
 }
 
@@ -189,23 +198,27 @@ process_wait (tid_t child_tid)
 {
   int status = -1;
   struct list_elem * e;
-  struct thread * t;
+  struct child_info * cinfo;
+  struct thread * cur = thread_current();
   int pid = child_tid;
 
-  for ( e = list_begin(ptr_all_list); e != list_end(ptr_all_list); e= list_next(e)){
+  for ( e = list_begin(&cur->child_list); e != list_end(&cur->child_list); e= list_next(e)){
 
-    t = list_entry(e, struct thread, allelem);
-    if (pid == t->tid && t->parent == thread_current()){
+    cinfo = list_entry(e, struct child_info, child_elem);
+    if (pid == cinfo->tid){
 
-      lock_acquire(&t->child_lock);
-
-      status = thread_current()->child_status;
+//      printf("Let's Lock!! -> %d\n",thread_current()->tid);
+      lock_acquire(&cinfo->child->child_lock);
+//      printf("status in wait: %d\n", thread_current()->child_status);
+//      printf("tid in wait: %d\n",thread_current()->tid);
+      status = cinfo->status;
+      list_remove(e);
+      free(cinfo);
       break;
     }
   }
-
+  
   return status;
-  //return wait(child_tid);
 }
 
 /* Free the current process's resources. */

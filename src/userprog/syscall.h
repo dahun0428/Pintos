@@ -6,11 +6,6 @@
 #include "filesys/file.h"
 
 typedef int pid_t;
-struct file_des
-{
-  struct file * file;
-  int fd;
-};
 #define PID_ERROR ((pid_t) -1)
 
 #define bool	_Bool
@@ -21,25 +16,25 @@ struct file_des
 
 void syscall_init (void);
 
-void halt(void);
+void sys_halt(void);
 
-void exit(int);
+void sys_exit(int);
 
-pid_t exec(const char *);
+pid_t sys_exec(const char *);
 
-int wait(pid_t);
+int sys_wait(pid_t);
 
-bool create(const char *, unsigned initial_size);
-bool remove(const char *);
+bool sys_create(const char *, unsigned initial_size);
+bool sys_remove(const char *);
 
-int open(const char *);
-int filesize(int);
-int read(int, void *, unsigned);
-int write(int, const void *, unsigned);
+int sys_open(const char *);
+int sys_filesize(int);
+int sys_read(int, void *, unsigned);
+int sys_write(int, const void *, unsigned);
 
-void seek(int, unsigned);
-unsigned tell(int);
+void sys_seek(int, unsigned);
+unsigned sys_tell(int);
 
-void close(int);
+void sys_close(int);
 
 #endif /* userprog/syscall.h */

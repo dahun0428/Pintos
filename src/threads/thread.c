@@ -8,6 +8,7 @@
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
 #include "threads/palloc.h"
+#include "threads/malloc.h"
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
@@ -185,6 +186,12 @@ thread_create (const char *name, int priority,
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
   t->parent = thread_current();
+  struct child_info *c_info =
+    malloc(sizeof(struct child_info));
+  c_info->child = t;
+  c_info->tid = t->tid;
+  list_push_back(&thread_current()->child_list, 
+      &c_info->child_elem);
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 
@@ -292,6 +299,8 @@ void
 thread_exit (void) 
 {
   ASSERT (!intr_context ());
+  struct list_elem * e;
+  struct list * l = &thread_current()->child_list;
 
 #ifdef USERPROG
   process_exit ();
@@ -301,6 +310,12 @@ thread_exit (void)
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
   intr_disable ();
+  for (e = list_begin(l); e != list_end(l);){
+    struct list_elem * temp;
+    temp = list_next(e);
+    free(list_entry(e, struct child_info, child_elem));
+    e = temp;
+  }
   list_remove (&thread_current()->allelem);
   thread_current ()->status = THREAD_DYING;
   schedule ();
@@ -465,6 +480,7 @@ init_thread (struct thread *t, const char *name, int priority)
   ASSERT (t != NULL);
   ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
   ASSERT (name != NULL);
+  int i;
 
   memset (t, 0, sizeof *t);
   t->status = THREAD_BLOCKED;
@@ -472,6 +488,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  for (i=2; i < 128; i++) 
+    t->file_des[i] = NULL;
+  list_init(&t->child_list);
   lock_init(&t->child_lock);
   list_push_back (&all_list, &t->allelem);
 
@@ -587,7 +606,7 @@ allocate_tid (void)
   return tid;
 }
 
-struct thread * tid2thread(tid_t t){
+struct thread * tid2c_info(tid_t t){
   struct list_elem *e;
 
   for(e = list_begin(&all_list); e != list_end(&all_list);

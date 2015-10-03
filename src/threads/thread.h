@@ -15,6 +15,12 @@ enum thread_status
     THREAD_DYING        /* About to be destroyed. */
   };
 
+struct file_des
+{
+  struct file * file;
+  int fd;
+};
+
 /* Thread identifier type.
    You can redefine this to whatever type you like. */
 typedef int tid_t;
@@ -93,11 +99,10 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-
+    struct file_des *file_des[128];
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-    
 
 
 #endif
@@ -108,8 +113,16 @@ struct thread
     struct lock child_lock;
     struct thread * parent;
     int child_status;
-
+    struct list child_list;
   };
+
+struct child_info
+{
+  struct thread *child;
+  tid_t tid;
+  struct list_elem child_elem;
+  int status;
+};
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
