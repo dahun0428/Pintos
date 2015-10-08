@@ -190,6 +190,8 @@ thread_create (const char *name, int priority,
     malloc(sizeof(struct child_info));
   c_info->child = t;
   c_info->tid = t->tid;
+  lock_init (&c_info->child_lock);
+  t -> myinfo = c_info; 
   list_push_back(&thread_current()->child_list, 
       &c_info->child_elem);
 
@@ -490,8 +492,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   for (i=2; i < 128; i++) 
     t->file_des[i] = NULL;
+  t->on_wait = false;
   list_init(&t->child_list);
-  lock_init(&t->child_lock);
+//  t->cmd_copy = NULL;
   list_push_back (&all_list, &t->allelem);
 
 }

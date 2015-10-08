@@ -22,7 +22,7 @@
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
-struct semaphore wait_sema;
+
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
@@ -30,37 +30,37 @@ struct semaphore wait_sema;
 tid_t
 process_execute (const char *file_name) 
 {
-  char *fn_copy;
+  char *fn_copy, *name_copy;
   tid_t tid;
   char *token, *ptr;
-  struct file * file = NULL;
+  struct file* file;
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
-  if( is_kernel_vaddr(file_name) )
     fn_copy = palloc_get_page (0);
-
-  else 
-    fn_copy = palloc_get_page (PAL_USER);
+    name_copy = palloc_get_page (0);
 
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
+  strlcpy (name_copy, file_name, PGSIZE);
 
-  token = strtok_r( file_name, " ", &ptr);
+  token = strtok_r( name_copy, " ", &ptr);
 
   /* Create a new thread to execute FILE_NAME. */
-  file = filesys_open (file_name);
+  file = filesys_open (token);
   if (file == NULL) return -1;
-
-  else
+  else {
+    file_close(file);
     tid = thread_create (token, PRI_DEFAULT, start_process, fn_copy);
+  }
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
+  
+  palloc_free_page (name_copy);
 
-  //thread_yield();
-  int i = 10000001;
-  while(i--);
+  
+  thread_yield();
   
   return tid;
 }
@@ -73,7 +73,14 @@ rev_str(char *str)
   size_t i;
   size_t k;
 
-  if (len <2) return;
+  if (strlen(str) == 2){
+    temp = str[1];
+    str[1] = str[0];
+    str[0] = temp;
+    return;
+  }
+
+  else if (len < 2) return;
 
   k = len;
   for(i = 0; i < len; i++)
@@ -107,11 +114,10 @@ start_process (void *file_name_)
   char *ptr;
   char *cp_file_name;
 
-  if( is_kernel_vaddr(file_name) )
-    cp_file_name = palloc_get_page (0);
-  else cp_file_name = palloc_get_page (PAL_USER);
+  cp_file_name = palloc_get_page (0);
 
-  lock_acquire(&thread_current()->child_lock);
+
+  lock_acquire(&thread_current()->myinfo->child_lock);
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
@@ -161,7 +167,7 @@ start_process (void *file_name_)
   *user_esp = argc;
 
   user_esp -= 1;
-  *user_esp = NULL; // fake ret
+  *user_esp = NULL; /* fake ret */
 
   if_.esp = (void *)user_esp;
   
@@ -172,7 +178,6 @@ start_process (void *file_name_)
   if (!success) 
     thread_exit ();
   
-  //sema_up(&wait_sema);
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -202,22 +207,23 @@ process_wait (tid_t child_tid)
   struct thread * cur = thread_current();
   int pid = child_tid;
 
+  cur->on_wait = true;
   for ( e = list_begin(&cur->child_list); e != list_end(&cur->child_list); e= list_next(e)){
 
     cinfo = list_entry(e, struct child_info, child_elem);
-    if (pid == cinfo->tid){
+    if (pid == cinfo->tid ){//&& !cinfo->child->on_wait){
 
-//      printf("Let's Lock!! -> %d\n",thread_current()->tid);
-      lock_acquire(&cinfo->child->child_lock);
-//      printf("status in wait: %d\n", thread_current()->child_status);
-//      printf("tid in wait: %d\n",thread_current()->tid);
+      lock_acquire(&cinfo->child_lock);
+
       status = cinfo->status;
       list_remove(e);
       free(cinfo);
       break;
     }
   }
-  
+
+  cur->on_wait = false;
+
   return status;
 }
 

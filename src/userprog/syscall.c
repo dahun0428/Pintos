@@ -1,10 +1,12 @@
 #include "userprog/syscall.h"
 #include <stdio.h>
+#include <string.h>
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
+#include "threads/palloc.h"
 #include "userprog/process.h"
 #include "userprog/pagedir.h"
 #include "threads/pte.h"
@@ -66,6 +68,8 @@ syscall_handler (struct intr_frame *f )
       break;
 
     case SYS_REMOVE:
+      if(!CHECK_ARG1(esp)) sys_exit(-1);
+      ret = sys_remove(* (const char **) ARG1(esp) );
       break;
 
     case SYS_OPEN:
@@ -124,6 +128,7 @@ void sys_exit(int status)
   struct thread *cur = thread_current ();
   struct thread *par = cur->parent;
   struct list_elem * e;
+  int i;
 
   if( par != NULL ){
     for (e = list_begin(&par->child_list); 
@@ -137,21 +142,39 @@ void sys_exit(int status)
     }
   }
 
-  
-  printf ("%s: exit(%d)\n", thread_name() ,status);
+  for (e = list_begin(&cur->child_list);e != list_end(&cur->child_list);){
 
-  lock_release(&cur->child_lock);
+    struct child_info * cinfo = list_entry (e, struct child_info, child_elem);
+    sys_wait(cinfo->tid);
+
+    e = list_next(e);
+    free(cinfo);
+  } 
+
+  for (i=2 ; i < 128; i ++)
+    if(cur->file_des[i] != NULL) {
+      sys_close(i);
+
+      ASSERT( cur->file_des[i] == NULL );
+    }
+
+
+  printf ("%s: exit(%d)\n", thread_name() ,status);
+  lock_release(&cur->myinfo->child_lock);
   thread_exit();
 }
 
 pid_t sys_exec(const char * cmd_line)
 {
   int pid = -1;
+  char *cmd_copy;
   
   if(!is_user_vaddr( cmd_line )) sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, cmd_line)) sys_exit(-1);
-  if(cmd_line != NULL) pid =  process_execute(cmd_line);
+  if(cmd_line == NULL) return -1;
 
+  pid = process_execute (cmd_line);
+  
   return pid;
 }
 
@@ -175,6 +198,21 @@ bool sys_create (const char *file, unsigned initial_size)
   return success;
 }
 
+bool sys_remove(const char *file)
+{
+  bool success = false;
+  
+  if(!is_user_vaddr( file )) sys_exit(-1);
+  if(!pagedir_get_page(thread_current()->pagedir, file)) sys_exit(-1);
+
+  if (file != NULL) 
+    success = filesys_remove(file);
+
+  else sys_exit(-1);
+
+  return success;
+  
+}
 
 int sys_open (const char *file)
 {
@@ -201,6 +239,9 @@ int sys_open (const char *file)
 
   fds->fd = fd;
   t->file_des[fd] = fds;
+  
+  if (strcmp (file, t->name) == 0)
+    file_deny_write(t->file_des[fd]->file);
 
 
   return fd;
@@ -210,12 +251,10 @@ int sys_filesize(int fd){
   struct file * file_opened ;
   struct thread * t = thread_current();
   ASSERT(fd == t->file_des[fd]->fd);
-  
 
   if (t->file_des[fd] == NULL) return -1;
   
   file_opened = t->file_des[fd]->file;
-
 
   return file_length( file_opened );
 }
@@ -230,7 +269,7 @@ int sys_read(int fd, void * buffer, unsigned size)
   if ( (fd == 0 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
-  file_deny_write(t->file_des[fd]->file);
+ // file_deny_write(t->file_des[fd]->file);
 
   if (fd == 0){
    /* need more implementation */ 
@@ -239,7 +278,6 @@ int sys_read(int fd, void * buffer, unsigned size)
   else 
     ret = file_read(t->file_des[fd]->file, buffer, size);
 
-  file_allow_write(t->file_des[fd]->file);
 
   return ret;
 }
@@ -286,6 +324,7 @@ void sys_close(int fd)
 
   else if ( t->file_des[fd] == NULL ) return;
 
+  file_allow_write(t->file_des[fd]->file);
   file_close(t->file_des[fd]->file);
   free(t->file_des[fd]);
   t->file_des[fd] = NULL;

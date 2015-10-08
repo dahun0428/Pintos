@@ -110,10 +110,12 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 
-    struct lock child_lock;
     struct thread * parent;
     int child_status;
     struct list child_list;
+    bool on_wait;
+    struct child_info * myinfo;
+//    char * cmd_copy;
   };
 
 struct child_info
@@ -121,6 +123,7 @@ struct child_info
   struct thread *child;
   tid_t tid;
   struct list_elem child_elem;
+  struct lock child_lock;
   int status;
 };
 

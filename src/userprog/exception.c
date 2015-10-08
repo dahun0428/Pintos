@@ -158,12 +158,14 @@ page_fault (struct intr_frame *f)
           not_present ? "not present" : "rights violation",
           write ? "writing" : "reading",
           user ? "user" : "kernel");
-  if(fault_addr == NULL) 
+ /* if(fault_addr == NULL) 
     sys_exit(-1);
   else if ( is_kernel_vaddr(fault_addr) ) 
-    sys_exit(-1);
+    sys_exit(-1);*/
+
+  sys_exit(-1);
 
 
-  kill (f);
+//  kill (f);
 }
 
