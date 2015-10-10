@@ -188,8 +188,14 @@ thread_create (const char *name, int priority,
   t->parent = thread_current();
   struct child_info *c_info =
     malloc(sizeof(struct child_info));
+
+  if (c_info == NULL)
+    return TID_ERROR;
+
   c_info->child = t;
-  c_info->tid = t->tid;
+  c_info->tid = tid;
+  c_info->load_success = false;
+  sema_init(&c_info->check_load,0);
   lock_init (&c_info->child_lock);
   t -> myinfo = c_info; 
   list_push_back(&thread_current()->child_list, 

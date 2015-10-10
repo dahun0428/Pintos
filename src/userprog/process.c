@@ -27,6 +27,7 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
    thread id, or TID_ERROR if the thread cannot be created. */
+
 tid_t
 process_execute (const char *file_name) 
 {
@@ -34,14 +35,17 @@ process_execute (const char *file_name)
   tid_t tid;
   char *token, *ptr;
   struct file* file;
+  struct list_elem * e;
+  struct child_info * cinfo;
+  struct thread * cur = thread_current();
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
     fn_copy = palloc_get_page (0);
     name_copy = palloc_get_page (0);
 
-  if (fn_copy == NULL)
-    return TID_ERROR;
+  if (fn_copy == NULL || name_copy == NULL)
+    goto free_copy_bufs;
   strlcpy (fn_copy, file_name, PGSIZE);
   strlcpy (name_copy, file_name, PGSIZE);
 
@@ -49,20 +53,46 @@ process_execute (const char *file_name)
 
   /* Create a new thread to execute FILE_NAME. */
   file = filesys_open (token);
-  if (file == NULL) return -1;
+  if (file == NULL) 
+    goto free_copy_bufs;
+
   else {
     file_close(file);
     tid = thread_create (token, PRI_DEFAULT, start_process, fn_copy);
   }
   if (tid == TID_ERROR)
-    palloc_free_page (fn_copy); 
+    goto free_copy_bufs;
   
   palloc_free_page (name_copy);
 
+  for ( e = list_begin(&cur->child_list); e != list_end(&cur->child_list); e= list_next(e)){
+
+    cinfo = list_entry(e, struct child_info, child_elem);
+    if (tid == cinfo->tid && thread_current () == cinfo->child->parent){
+
+      sema_down(&cinfo->check_load);
+
+      if (cinfo->load_success == false){
+        list_remove(e);
+        free(cinfo);
+        return TID_ERROR;
+      }
+      break;
+    }
+  }
   
   thread_yield();
   
+  // Success
   return tid;
+
+
+  // Failed
+free_copy_bufs:
+  if (fn_copy) palloc_free_page(fn_copy);
+  if (name_copy) palloc_free_page(name_copy);
+
+    return TID_ERROR;
 }
 
 void 
@@ -106,7 +136,7 @@ start_process (void *file_name_)
 {
   char *file_name = file_name_;
   struct intr_frame if_;
-  bool success;
+  bool success = false;
   unsigned int * user_esp;
   char * sub_BASE;
   int iter,sub_iter,argc=0;
@@ -116,6 +146,9 @@ start_process (void *file_name_)
 
   cp_file_name = palloc_get_page (0);
 
+  if(cp_file_name == NULL)
+    goto free_name_bufs;
+  
 
   lock_acquire(&thread_current()->myinfo->child_lock);
   /* Initialize interrupt frame and load executable. */
@@ -129,6 +162,12 @@ start_process (void *file_name_)
   token = strtok_r(cp_file_name, " ", &ptr );
 
   success = load (token, &if_.eip, &if_.esp);
+
+  if(success)
+    thread_current ()->myinfo->load_success = true;
+
+
+  sema_up(&thread_current()->myinfo->check_load);
 
   rev_str(file_name);
 
@@ -172,12 +211,14 @@ start_process (void *file_name_)
   if_.esp = (void *)user_esp;
   
   /* If load failed, quit. */
-  palloc_free_page (file_name);
-  palloc_free_page (cp_file_name);
+  free_name_bufs:
+    palloc_free_page (file_name);
+    palloc_free_page (cp_file_name);
 
   if (!success) 
-    thread_exit ();
-  
+    sys_exit(-1);
+//    thread_exit ();
+    
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -578,6 +619,9 @@ setup_stack (void **esp)
       else
         palloc_free_page (kpage);
     }
+  
+  else
+    printf("FUCKING PAGE\n");
   return success;
 }
 

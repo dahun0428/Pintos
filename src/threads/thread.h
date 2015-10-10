@@ -124,6 +124,8 @@ struct child_info
   tid_t tid;
   struct list_elem child_elem;
   struct lock child_lock;
+  struct semaphore check_load;
+  bool load_success;
   int status;
 };
 

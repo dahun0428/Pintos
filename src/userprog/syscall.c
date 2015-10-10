@@ -169,12 +169,12 @@ pid_t sys_exec(const char * cmd_line)
   int pid = -1;
   char *cmd_copy;
   
-  if(!is_user_vaddr( cmd_line )) sys_exit(-1);
+  if(!is_user_vaddr( cmd_line ))   sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, cmd_line)) sys_exit(-1);
   if(cmd_line == NULL) return -1;
 
   pid = process_execute (cmd_line);
-  
+ 
   return pid;
 }
 
@@ -216,16 +216,22 @@ bool sys_remove(const char *file)
 
 int sys_open (const char *file)
 {
-  struct file_des * fds = calloc(1, sizeof (struct file_des));  
+  struct file_des * fds;
   struct thread * t = thread_current();
   if(!is_user_vaddr( file )) sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, file)) sys_exit(-1);
 
   if(file == NULL) return -1;
 
+  fds = calloc(1, sizeof (struct file_des));  
+
+  if (fds == NULL)
+    sys_exit(-1);
+
   fds->file = filesys_open (file);
 
   int fd = 2;
+
 
   if (fds->file == NULL) return -1;
 
@@ -269,12 +275,13 @@ int sys_read(int fd, void * buffer, unsigned size)
   if ( (fd == 0 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
- // file_deny_write(t->file_des[fd]->file);
 
-  if (fd == 0){
-   /* need more implementation */ 
-    input_getc();
-  }
+  if (fd == 0)
+    while(size != ret) {
+      *( (char*) buffer++) = input_getc ();
+      ret++;
+    }
+
   else 
     ret = file_read(t->file_des[fd]->file, buffer, size);
 

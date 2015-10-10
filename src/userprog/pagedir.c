@@ -73,7 +73,7 @@ lookup_page (uint32_t *pd, const void *vaddr, bool create)
           pt = palloc_get_page (PAL_ZERO);
           if (pt == NULL) 
             return NULL; 
-      
+
           *pde = pde_create (pt);
         }
       else
