@@ -18,6 +18,7 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/synch.h"
+#include "vm/frame.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -209,7 +210,10 @@ start_process (void *file_name_)
   *user_esp = NULL; /* fake ret */
 
   if_.esp = (void *)user_esp;
-  
+    
+  thread_current ()->file = filesys_open (thread_current ()->name);
+  file_deny_write(thread_current ()->file);
+
   /* If load failed, quit. */
   free_name_bufs:
     palloc_free_page (file_name);
@@ -620,8 +624,8 @@ setup_stack (void **esp)
         palloc_free_page (kpage);
     }
   
-  else
-    printf("FUCKING PAGE\n");
+/*  else
+    printf("FUCKING PAGE\n");*/
   return success;
 }
 

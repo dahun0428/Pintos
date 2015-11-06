@@ -115,18 +115,19 @@ struct thread
     struct list child_list;
     bool on_wait;
     struct child_info * myinfo;
+    struct file * file;
 //    char * cmd_copy;
   };
 
 struct child_info
 {
-  struct thread *child;
-  tid_t tid;
-  struct list_elem child_elem;
-  struct lock child_lock;
-  struct semaphore check_load;
-  bool load_success;
-  int status;
+  struct thread *child; /* child pointer */
+  tid_t tid;            /* child tid */
+  struct list_elem child_elem; /* elem in child_list of parent thread */
+  struct lock child_lock;      /* lock for wait() */
+  struct semaphore check_load; /* check for success of load() */
+  bool load_success;            
+  int status;                   /* exit status */
 };
 
 /* If false (default), use round-robin scheduler.

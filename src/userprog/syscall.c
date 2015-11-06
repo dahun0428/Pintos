@@ -158,6 +158,8 @@ void sys_exit(int status)
       ASSERT( cur->file_des[i] == NULL );
     }
 
+  if(cur->file != NULL) 
+    file_allow_write(cur->file);
 
   printf ("%s: exit(%d)\n", thread_name() ,status);
   lock_release(&cur->myinfo->child_lock);
@@ -246,8 +248,8 @@ int sys_open (const char *file)
   fds->fd = fd;
   t->file_des[fd] = fds;
   
-  if (strcmp (file, t->name) == 0)
-    file_deny_write(t->file_des[fd]->file);
+/*  if (strcmp (file, t->name) == 0)
+    file_deny_write(t->file_des[fd]->file); */
 
 
   return fd;
@@ -331,7 +333,7 @@ void sys_close(int fd)
 
   else if ( t->file_des[fd] == NULL ) return;
 
-  file_allow_write(t->file_des[fd]->file);
+ // file_allow_write(t->file_des[fd]->file);
   file_close(t->file_des[fd]->file);
   free(t->file_des[fd]);
   t->file_des[fd] = NULL;
