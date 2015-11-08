@@ -110,13 +110,17 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 
+    /* for Syscall; Pintos #2 */
     struct thread * parent;
     int child_status;
     struct list child_list;
     bool on_wait;
     struct child_info * myinfo;
     struct file * file;
-//    char * cmd_copy;
+
+    /* for VM; Pintos #3 */
+    struct sup_page p_hash;
+
   };
 
 struct child_info

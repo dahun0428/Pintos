@@ -15,6 +15,7 @@
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
+#include "vm/frame.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -93,6 +94,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
+  init_frame_list();
   ptr_all_list = &all_list;
 
   /* Set up a thread structure for the running thread. */
@@ -206,6 +208,8 @@ thread_create (const char *name, int priority,
      member cannot be observed. */
   old_level = intr_disable ();
 
+  hash_init (&t->p_hash->page_list, page_hash, page_less, NULL);
+
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf);
   kf->eip = NULL;
@@ -318,6 +322,7 @@ thread_exit (void)
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
   intr_disable ();
+
   for (e = list_begin(l); e != list_end(l);){
     struct list_elem * temp;
     temp = list_next(e);

@@ -1,27 +1,29 @@
 #include "frame.h"
 #include "threads/palloc.h"
+#include "threads/malloc.h"
 #include "threads/vaddr.h"
 
-static struct hash frame_hash; 
+static struct list frame_list; 
 
 
+void init_frame_list(void){
+  list_init(&frame_list);
+}
 
 void *
 get_frame_single (){
 
-  void * new_page = palloc_get_page (PAL_USER); 
-  struct frame * single = (struct frame *) malloc (struct frame);
+  void * new_page = palloc_get_page (PAL_USER | PAL_ZERO); 
+  struct frame * single = (struct frame *) malloc (sizeof(struct frame));
 
-  if (new_page == NULL){
+  if (new_page == NULL){    /* swap */
     if(!single)
       free(single);
   }
 
   else{
     single->vaddr = new_page;
-    single->paddr = vtop(new_page); 
-
-    hash_insert (&frame_hash, single->elem);
+    list_push_back (&frame_list, &single->felem);
   }
 
   return new_page;
@@ -31,7 +33,7 @@ get_frame_single (){
 uintptr_t
 get_frame_paddr(struct frame * f){
   
-  return f->paddr;
+  return vtop(f->vaddr);
 }
 
 void *
