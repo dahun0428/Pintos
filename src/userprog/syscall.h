@@ -8,6 +8,9 @@
 typedef int pid_t;
 #define PID_ERROR ((pid_t) -1)
 
+typedef int mapid_t;
+#define MAP_FAILED ((mapid_t) -1)
+
 #define bool	_Bool
 #define true	1
 #define false	0
@@ -36,5 +39,8 @@ void sys_seek(int, unsigned);
 unsigned sys_tell(int);
 
 void sys_close(int);
+
+mapid_t sys_mmap (int, void *);
+void sys_munmap (mapid_t);
 
 #endif /* userprog/syscall.h */

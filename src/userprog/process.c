@@ -568,8 +568,9 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
   ASSERT (pg_ofs (upage) == 0);
   ASSERT (ofs % PGSIZE == 0);
-
+  
   file_seek (file, ofs);
+  off_t u_ofs = ofs;
   while (read_bytes > 0 || zero_bytes > 0) 
     {
       /* Calculate how to fill this page.
@@ -578,31 +579,35 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-      /* Get a page of memory. */
-      //uint8_t *kpage = palloc_get_page (PAL_USER);
+      /* Allocate page */
+      struct page * page = lazy(file, u_ofs, upage, page_read_bytes, writable);
+
+      if (!page) 
+        return false;
+      /*
       uint8_t *kpage = get_frame_single();
       if (kpage == NULL)
         return false;
 
-      /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
-          palloc_free_page (kpage);
+          free_frame_single (kpage);
           return false; 
         }
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
 
-      /* Add the page to the process's address space. */
       if (!install_page (upage, kpage, writable)) 
         {
-          palloc_free_page (kpage);
+          free_frame_single (kpage);
           return false; 
         }
+      */
 
       /* Advance. */
       read_bytes -= page_read_bytes;
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
+      u_ofs += PGSIZE;
     }
   return true;
 }
@@ -615,17 +620,19 @@ setup_stack (void **esp)
   uint8_t *kpage;
   bool success = false;
 
-  kpage = get_frame_single();
-  //kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+/*  kpage = get_frame_single();
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
         *esp = PHYS_BASE;
       else
-        palloc_free_page (kpage);
+        free_frame_single (kpage);
     }
-  
+  if (lazy (NULL, 0, ((uint8_t *) PHYS_BASE) - PGSIZE, 0, true)){*/
+    success = true;
+    *esp = PHYS_BASE;
+//  }
 /*  else
     printf("FUCKING PAGE\n");*/
   return success;

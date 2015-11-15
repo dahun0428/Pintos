@@ -1,32 +1,58 @@
-#include "frame.h"
+#include <list.h>
 #include "threads/palloc.h"
 #include "threads/malloc.h"
 #include "threads/vaddr.h"
+#include "threads/thread.h"
+#include "threads/synch.h"
+#include "vm/frame.h"
+#include "vm/page.h"
 
 static struct list frame_list; 
 
+#define PAGE_ADDR 0xfffff000 /* Address bits*/
 
-void init_frame_list(void){
-  list_init(&frame_list);
+void init_frame_list(void)
+{
+  list_init (&frame_list);
 }
 
 void *
 get_frame_single (){
 
-  void * new_page = palloc_get_page (PAL_USER | PAL_ZERO); 
-  struct frame * single = (struct frame *) malloc (sizeof(struct frame));
+  void * mem_new = palloc_get_page (PAL_USER); 
+  struct frame * single = (struct frame *) malloc (sizeof (struct frame));
 
-  if (new_page == NULL){    /* swap */
+  if (mem_new == NULL){    /* swap */
     if(!single)
       free(single);
   }
 
   else{
-    single->vaddr = new_page;
+    single->vaddr = mem_new; // & PAGE_ADDR);
     list_push_back (&frame_list, &single->felem);
   }
 
-  return new_page;
+  return mem_new;
+
+}
+
+void
+free_frame_single (void * vaddr){
+  
+  struct list_elem * e;
+
+  for (e = list_begin (&frame_list); e != list_end (&frame_list); e = list_next (e))
+  {
+    struct frame * single = list_entry (e, struct frame, felem);
+
+    if ( single->vaddr == pg_round_down (vaddr) )
+    {
+      palloc_free_page (single->vaddr);
+      list_remove(e);
+      free(single);
+      break;
+    }
+  }
 
 }
 

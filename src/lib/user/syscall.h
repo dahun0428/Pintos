@@ -35,7 +35,7 @@ unsigned tell (int fd);
 void close (int fd);
 
 /* Project 3 and optionally project 4. */
-mapid_t mmap (int fd, void *addr);
+mapid_t mmap (int,  void *);
 void munmap (mapid_t);
 
 /* Project 4 only. */

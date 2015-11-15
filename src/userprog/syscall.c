@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <syscall-nr.h>
+#include <hash.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
@@ -38,11 +39,12 @@ syscall_handler (struct intr_frame *f )
   int ret;
   void * esp = f->esp;
 
-  if(!pagedir_get_page(thread_current()->pagedir, esp)) sys_exit(-1);
 
+  thread_current()->esp = esp;
   syscall_num =  * (int *)esp; 
 
-  switch( syscall_num) {
+  switch (syscall_num)
+  {
     case SYS_HALT:
       sys_halt();
       break;
@@ -109,6 +111,16 @@ syscall_handler (struct intr_frame *f )
       sys_close( * (int *)ARG1(esp));
       break;
 
+    case SYS_MMAP:
+      if(!CHECK_ARG2(esp)) sys_exit(-1);
+      sys_mmap( *(int*) ARG1(esp),* (void **) ARG2(esp));
+      break;
+
+    case SYS_MUNMAP:
+      if(!CHECK_ARG1(esp)) sys_exit(-1);
+      sys_munmap( * (mapid_t *)ARG1(esp));
+      break;
+
     default:
       sys_exit(-1);
       break;
@@ -161,8 +173,10 @@ void sys_exit(int status)
   if(cur->file != NULL) 
     file_allow_write(cur->file);
 
+  page_table_clean (&cur->p_hash);
+
   printf ("%s: exit(%d)\n", thread_name() ,status);
-  lock_release(&cur->myinfo->child_lock);
+  lock_release (&cur->myinfo->child_lock);
   thread_exit();
 }
 
@@ -220,7 +234,7 @@ int sys_open (const char *file)
 {
   struct file_des * fds;
   struct thread * t = thread_current();
-  if(!is_user_vaddr( file )) sys_exit(-1);
+ // if(!is_user_vaddr( file )) sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, file)) sys_exit(-1);
 
   if(file == NULL) return -1;
@@ -272,14 +286,14 @@ int sys_read(int fd, void * buffer, unsigned size)
   off_t ret = 0;
   struct thread * t = thread_current();
 
-  if(!is_user_vaddr( buffer )) sys_exit(-1);
+ // if(!is_user_vaddr( buffer )) sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, buffer)) sys_exit(-1);
   if ( (fd == 0 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
 
   if (fd == 0)
-    while(size != ret) {
+    while(size != (unsigned) ret) {
       *( (char*) buffer++) = input_getc ();
       ret++;
     }
@@ -296,8 +310,7 @@ int sys_write(int fd, const void * buffer, unsigned size)
   off_t ret = 0;
   struct thread * t = thread_current();
   
-  if(!is_user_vaddr( buffer )) sys_exit(-1);
-  if(!pagedir_get_page(thread_current()->pagedir, buffer)) sys_exit(-1);
+  //if(!is_user_vaddr( buffer )) sys_exit(-1);
   if ( (fd == 1 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
@@ -339,3 +352,52 @@ void sys_close(int fd)
   t->file_des[fd] = NULL;
 }
 
+mapid_t sys_mmap (int fd, void * addr){
+
+  struct thread * t = thread_current ();
+  ASSERT (pg_ofs (addr) == 0);
+ // if(!is_user_vaddr( addr )) sys_exit(-1);
+  if (  (2 <= fd && fd <128)  == false) return -1;
+  if ( fd >1 && t->file_des[fd] == NULL) return -1;
+
+  size_t file_size = sys_filesize (fd);
+  void * vaddr = addr;
+
+  while ((int)file_size > 0)
+  {
+
+    if (pagedir_get_page (t->pagedir, vaddr) != NULL)
+      return MAP_FAILED;
+
+    vaddr += PGSIZE;
+    file_size -= PGSIZE;
+
+  }
+
+  file_size = sys_filesize (fd);
+  vaddr = addr;
+  off_t ofs = 0;
+  while ((int)file_size > 0)
+  {
+    size_t read_size = file_size < PGSIZE ? file_size : PGSIZE;
+
+    struct page * page = lazy (t->file_des[fd]->file, ofs, vaddr, read_size, true); 
+
+    page->file = true;
+    page->mapid = fd;
+
+    vaddr += PGSIZE;
+    ofs += PGSIZE;
+    file_size -= PGSIZE;
+
+  }
+
+
+  return fd;
+}
+
+
+void sys_munmap (mapid_t mapping){
+
+  page_unmap (mapping);
+}

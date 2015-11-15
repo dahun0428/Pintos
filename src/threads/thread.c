@@ -16,6 +16,7 @@
 #include "userprog/process.h"
 #endif
 #include "vm/frame.h"
+#include "vm/page.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -46,6 +47,9 @@ struct kernel_thread_frame
     thread_func *function;      /* Function to call. */
     void *aux;                  /* Auxiliary data for function. */
   };
+
+struct page;
+struct sup_page;
 
 /* Statistics. */
 static long long idle_ticks;    /* # of timer ticks spent idle. */
@@ -94,7 +98,6 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
-  init_frame_list();
   ptr_all_list = &all_list;
 
   /* Set up a thread structure for the running thread. */
@@ -208,7 +211,7 @@ thread_create (const char *name, int priority,
      member cannot be observed. */
   old_level = intr_disable ();
 
-  hash_init (&t->p_hash->page_list, page_hash, page_less, NULL);
+  sup_page_init (&t->p_hash);
 
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf);
@@ -620,7 +623,7 @@ allocate_tid (void)
   return tid;
 }
 
-struct thread * tid2c_info(tid_t t){
+struct thread * tid2thread(tid_t t){
   struct list_elem *e;
 
   for(e = list_begin(&all_list); e != list_end(&all_list);

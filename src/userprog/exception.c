@@ -7,6 +7,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "userprog/syscall.h"
+#include "vm/page.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -15,6 +16,7 @@ static struct lock page_fault_lock;
 
 static void kill (struct intr_frame *);
 static void page_fault (struct intr_frame *);
+
 
 /* Registers handlers for interrupts that can be caused by user
    programs.
@@ -155,7 +157,33 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
-  
+  lock_acquire (&page_fault_lock);
+
+  void * esp = user ? f->esp : thread_current()->esp;
+  int diff = (int)esp - (int) fault_addr;
+
+
+  struct page * p = vaddr2page ( &thread_current ()->p_hash, fault_addr);
+//  printf("user: %d\nnotp: %d\ndiff: %d\nesp: %p\np: %p\nfaultaddr: %p\n",user,not_present,diff,esp,p,fault_addr);
+
+  if (p != NULL ){
+
+    if (load_lazy (p)){
+      lock_release (&page_fault_lock);
+      return ;
+    }
+  }
+
+  else if (p == NULL && not_present && (diff <= 32 || esp == 0) && diff != 0){
+    
+    new_stack_page (f, fault_addr, user);
+    lock_release (&page_fault_lock);
+    return;
+  }
+
+
+
+  lock_release (&page_fault_lock);
 
   sys_exit(-1);
 
