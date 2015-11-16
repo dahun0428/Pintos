@@ -29,6 +29,7 @@ get_frame_single (){
 
   else{
     single->vaddr = mem_new; // & PAGE_ADDR);
+    single->have_page = true;
     list_push_back (&frame_list, &single->felem);
   }
 
@@ -54,6 +55,39 @@ free_frame_single (void * vaddr){
     }
   }
 
+}
+
+void
+solo_frame_single (void * vaddr){
+  
+  struct list_elem * e;
+
+  for (e = list_begin (&frame_list); e != list_end (&frame_list); e = list_next (e))
+  {
+    struct frame * single = list_entry (e, struct frame, felem);
+
+    if ( single->vaddr == pg_round_down (vaddr) )
+    {
+      single->have_page = false;
+      break;
+    }
+  }
+
+}
+
+void
+free_frame_all (){
+
+  struct list_elem * e;
+
+  for (e = list_begin (&frame_list); e != list_end (&frame_list); e = list_next (e))
+  {
+    struct frame * single = list_entry (e, struct frame, felem);
+
+      palloc_free_page (single->vaddr);
+      list_remove(e);
+      free(single);
+  }
 }
 
 uintptr_t

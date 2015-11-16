@@ -504,7 +504,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  for (i=2; i < 128; i++) 
+  for (i=2; i < 128; i++)
     t->file_des[i] = NULL;
   t->on_wait = false;
   list_init(&t->child_list);

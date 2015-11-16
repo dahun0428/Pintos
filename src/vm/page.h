@@ -17,7 +17,7 @@ struct page
   struct hash_elem pelem; /* hash_elem in page.c */
 
   void * addr; /* address of frame ; frame number (?) ; maybe vaddr */
-  void * frame;
+  void * frame_addr;
 
   struct thread * t;
 
@@ -59,6 +59,8 @@ void page_table_clean (struct sup_page *);
 
 void * new_stack_page (struct intr_frame *, void *, bool);
 struct page * vaddr2page (struct sup_page *, void *);
+struct page * mapid2page (struct sup_page *, mapid_t);
+struct page * page_first (struct sup_page *, bool);
 
 void page_unmap (mapid_t);
 

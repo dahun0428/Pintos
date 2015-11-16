@@ -113,7 +113,7 @@ syscall_handler (struct intr_frame *f )
 
     case SYS_MMAP:
       if(!CHECK_ARG2(esp)) sys_exit(-1);
-      sys_mmap( *(int*) ARG1(esp),* (void **) ARG2(esp));
+      ret = sys_mmap( *(int*) ARG1(esp),* (void **) ARG2(esp));
       break;
 
     case SYS_MUNMAP:
@@ -163,9 +163,17 @@ void sys_exit(int status)
     free(cinfo);
   } 
 
+
   for (i=2 ; i < 128; i ++)
-    if(cur->file_des[i] != NULL) {
+    if (cur->file_des[i] != NULL )
+    {
+      if (cur->file_des[i]->mapped){
+        page_unmap (i);
+        cur->file_des[i]->mapped = false;
+      }
+
       sys_close(i);
+
 
       ASSERT( cur->file_des[i] == NULL );
     }
@@ -183,7 +191,6 @@ void sys_exit(int status)
 pid_t sys_exec(const char * cmd_line)
 {
   int pid = -1;
-  char *cmd_copy;
   
   if(!is_user_vaddr( cmd_line ))   sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, cmd_line)) sys_exit(-1);
@@ -260,6 +267,7 @@ int sys_open (const char *file)
   if (fd == 128) return -1;
 
   fds->fd = fd;
+  fds->mapped = false;
   t->file_des[fd] = fds;
   
 /*  if (strcmp (file, t->name) == 0)
@@ -286,8 +294,8 @@ int sys_read(int fd, void * buffer, unsigned size)
   off_t ret = 0;
   struct thread * t = thread_current();
 
- // if(!is_user_vaddr( buffer )) sys_exit(-1);
-  if(!pagedir_get_page(thread_current()->pagedir, buffer)) sys_exit(-1);
+  if(!is_user_vaddr( buffer )) sys_exit(-1);
+//  if(!pagedir_get_page(thread_current()->pagedir, buffer)) sys_exit(-1);
   if ( (fd == 0 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
@@ -314,12 +322,16 @@ int sys_write(int fd, const void * buffer, unsigned size)
   if ( (fd == 1 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
+
+  
   
   if (fd == 1){
     putbuf(buffer, size);
   }
-  else
+  else{
     ret = file_write(t->file_des[fd]->file, buffer, size);
+
+  }
 
   return ret;
 }
@@ -346,27 +358,41 @@ void sys_close(int fd)
 
   else if ( t->file_des[fd] == NULL ) return;
 
- // file_allow_write(t->file_des[fd]->file);
-  file_close(t->file_des[fd]->file);
-  free(t->file_des[fd]);
-  t->file_des[fd] = NULL;
+  if (!t->file_des[fd]->mapped){
+    file_close(t->file_des[fd]->file);
+    free(t->file_des[fd]);
+    t->file_des[fd] = NULL;
+  }
 }
 
 mapid_t sys_mmap (int fd, void * addr){
 
   struct thread * t = thread_current ();
-  ASSERT (pg_ofs (addr) == 0);
- // if(!is_user_vaddr( addr )) sys_exit(-1);
+//  ASSERT (pg_ofs (addr) == 0);
+//  if (addr == NULL) MAP_FAILED;
   if (  (2 <= fd && fd <128)  == false) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
   size_t file_size = sys_filesize (fd);
   void * vaddr = addr;
+ 
 
+  if (file_size == 0) 
+    return MAP_FAILED;
+
+  struct page * pf = page_first (&t->p_hash, true);
+
+  if ((unsigned)pf->addr > (unsigned)addr){
+    return MAP_FAILED;
+  }
+  
   while ((int)file_size > 0)
   {
 
     if (pagedir_get_page (t->pagedir, vaddr) != NULL)
+      return MAP_FAILED;
+
+    else if (vaddr2page (&t->p_hash, vaddr) != NULL)
       return MAP_FAILED;
 
     vaddr += PGSIZE;
@@ -383,6 +409,8 @@ mapid_t sys_mmap (int fd, void * addr){
 
     struct page * page = lazy (t->file_des[fd]->file, ofs, vaddr, read_size, true); 
 
+    if (page == NULL)
+      return MAP_FAILED;
     page->file = true;
     page->mapid = fd;
 
@@ -392,6 +420,7 @@ mapid_t sys_mmap (int fd, void * addr){
 
   }
 
+  t->file_des[fd]->mapped = true;
 
   return fd;
 }
@@ -399,5 +428,6 @@ mapid_t sys_mmap (int fd, void * addr){
 
 void sys_munmap (mapid_t mapping){
 
+  thread_current ()->file_des[mapping]->mapped = false;
   page_unmap (mapping);
 }

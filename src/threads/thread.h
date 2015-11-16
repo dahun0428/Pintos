@@ -20,6 +20,7 @@ struct file_des
 {
   struct file * file;
   int fd;
+  bool mapped;
 };
 
 /* Thread identifier type.
