@@ -7,5 +7,11 @@
 
 
 
+struct page * select_victim (void);
+void swap_init (void);
 
+void swap_block (struct page *);
+void swap_unblock (struct page *);
+
+void swap_clean_bit (uint32_t);
 #endif

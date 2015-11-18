@@ -6,6 +6,7 @@
 #include "threads/thread.h"
 #include "threads/synch.h"
 #include "filesys/file.h"
+#include "devices/block.h"
 #include <hash.h>
 
 #define MAX_STACK_PAGE 2000
@@ -22,16 +23,17 @@ struct page
   struct thread * t;
 
   bool valid;
-  bool accessed;
-  bool dirty;
+  bool accessed; /* useless */
+  bool dirty; /* useless */
   bool loaded;
   bool swapped;
-  void * block_swap;
-  bool stack;
+  bool rntly_swap;
   bool file;
+  block_sector_t swap_idx;
+  bool stack;
   mapid_t mapid;
-  bool ref;
-  bool modified;
+  bool ref; /* useless */
+  bool modified; /* useless */
   bool writable;
 
   struct file * cur_file;
@@ -52,6 +54,7 @@ unsigned page_hash (const struct hash_elem *, void *);
 bool page_less (const struct hash_elem *, const struct hash_elem *, void *);
 
 struct page * lazy (struct file *, off_t, uint8_t *, size_t, bool);
+bool load_swap (struct page *);
 bool load_lazy (struct page *);
 
 void sup_page_init (struct sup_page *);
@@ -63,6 +66,7 @@ struct page * mapid2page (struct sup_page *, mapid_t);
 struct page * page_first (struct sup_page *, bool);
 
 void page_unmap (mapid_t);
+void page_backup (struct page *);
 
 void page_visited (struct page *);
 void page_modified (struct page *);

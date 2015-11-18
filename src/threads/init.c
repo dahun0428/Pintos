@@ -24,6 +24,7 @@
 #include "threads/thread.h"
 #include "vm/page.h"
 #include "vm/frame.h"
+#include "vm/swap.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #include "userprog/exception.h"
@@ -120,6 +121,7 @@ main (void)
 
   /* VM */
   init_frame_list();
+  swap_init();
 
   /* Start thread scheduler and enable interrupts. */
   thread_start ();

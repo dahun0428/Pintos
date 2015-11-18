@@ -201,11 +201,12 @@ LSR_THRE	src/devices/serial.c	49;"	d	file:
 LS_REG	src/devices/serial.c	26;"	d	file:
 MAP_FAILED	src/lib/user/syscall.h	13;"	d
 MAP_FAILED	src/userprog/syscall.h	12;"	d
+MAX_BLOCK_PAGE	src/vm/swap.c	12;"	d	file:
 MAX_CNT	src/tests/internal/stdlib.c	19;"	d	file:
 MAX_ELEMS_PER_BUCKET	src/lib/kernel/hash.c	345;"	d	file:
 MAX_LEVEL	src/examples/pwd.c	76;"	d	file:
 MAX_SIZE	src/tests/internal/list.c	19;"	d	file:
-MAX_STACK_PAGE	src/vm/page.h	11;"	d
+MAX_STACK_PAGE	src/vm/page.h	12;"	d
 MAX_THREAD_CNT	src/tests/threads/mlfqs-fair.c	54;"	d	file:
 MCR_OUT2	src/devices/serial.c	45;"	d	file:
 MCR_REG	src/devices/serial.c	33;"	d	file:
@@ -230,7 +231,6 @@ Next	src/tests/Algorithm/Diff.pm	/^sub Next {$/;"	s
 OBJECTS	src/vm/build/Makefile	/^OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))$/;"	m
 PACKED	src/lib/packed.h	8;"	d
 PACKED	src/lib/ustar.c	/^PACKED;$/;"	v	typeref:struct:ustar_header
-PAGE_ADDR	src/vm/frame.c	12;"	d	file:
 PAL_ASSERT	src/threads/palloc.h	/^    PAL_ASSERT = 001,           \/* Panic on failure. *\/$/;"	e	enum:palloc_flags
 PAL_USER	src/threads/palloc.h	/^    PAL_USER = 004              \/* User page. *\/$/;"	e	enum:palloc_flags
 PAL_ZERO	src/threads/palloc.h	/^    PAL_ZERO = 002,             \/* Zero page contents. *\/$/;"	e	enum:palloc_flags
@@ -273,9 +273,9 @@ PRIX64	src/lib/inttypes.h	32;"	d
 PRIX8	src/lib/inttypes.h	11;"	d
 PRIXMAX	src/lib/inttypes.h	39;"	d
 PRIXPTR	src/lib/inttypes.h	46;"	d
-PRI_DEFAULT	src/threads/thread.h	32;"	d
-PRI_MAX	src/threads/thread.h	33;"	d
-PRI_MIN	src/threads/thread.h	31;"	d
+PRI_DEFAULT	src/threads/thread.h	33;"	d
+PRI_MAX	src/threads/thread.h	34;"	d
+PRI_MIN	src/threads/thread.h	32;"	d
 PRId16	src/lib/inttypes.h	13;"	d
 PRId32	src/lib/inttypes.h	20;"	d
 PRId64	src/lib/inttypes.h	27;"	d
@@ -467,7 +467,7 @@ THREAD_MAGIC	src/threads/thread_bak.c	21;"	d	file:
 THREAD_READY	src/threads/thread.h	/^    THREAD_READY,       \/* Not running but ready to run. *\/$/;"	e	enum:thread_status
 THREAD_RUNNING	src/threads/thread.h	/^    THREAD_RUNNING,     \/* Running thread. *\/$/;"	e	enum:thread_status
 THR_REG	src/devices/serial.c	22;"	d	file:
-TID_ERROR	src/threads/thread.h	28;"	d
+TID_ERROR	src/threads/thread.h	29;"	d
 TIMER_FREQ	src/devices/timer.h	8;"	d
 TIME_SLICE	src/threads/thread.c	60;"	d	file:
 TIME_SLICE	src/threads/thread_bak.c	54;"	d	file:
@@ -684,7 +684,6 @@ block_set_role	src/devices/block.c	/^block_set_role (enum block_type role, struc
 block_size	src/devices/block.c	/^block_size (struct block *block)$/;"	f
 block_size	src/threads/malloc.c	/^    size_t block_size;          \/* Size of each element in bytes. *\/$/;"	m	struct:desc	file:
 block_size	src/threads/malloc.c	/^block_size (void *block) $/;"	f	file:
-block_swap	src/vm/page.h	/^  void * block_swap;$/;"	m	struct:page
 block_thread	src/tests/threads/mlfqs-block.c	/^block_thread (void *lock_) $/;"	f	file:
 block_to_arena	src/threads/malloc.c	/^block_to_arena (struct block *b)$/;"	f	file:
 block_type	src/devices/block.c	/^block_type (struct block *block)$/;"	f
@@ -1011,12 +1010,14 @@ format_integer	src/lib/stdio.c	/^format_integer (uintmax_t value, bool is_signed
 format_string	src/lib/stdio.c	/^format_string (const char *string, int length,$/;"	f	file:
 found_partition	src/devices/partition.c	/^found_partition (struct block *block, uint8_t part_type,$/;"	f	file:
 frame	src/vm/frame.h	/^struct frame {$/;"	s
-frame	src/vm/page.h	/^  void * frame;$/;"	m	struct:page
+frame_addr	src/vm/page.h	/^  void * frame_addr;$/;"	m	struct:page
 frame_list	src/vm/frame.c	/^static struct list frame_list; $/;"	v	typeref:struct:list	file:
+frame_lock	src/vm/frame.c	/^static struct lock frame_lock;$/;"	v	typeref:struct:lock	file:
 frame_pointer	src/threads/interrupt.h	/^    void *frame_pointer;        \/* Saved EBP (frame pointer). *\/$/;"	m	struct:intr_frame
 free	src/threads/malloc.c	/^free (void *p) $/;"	f
 free_cnt	src/threads/malloc.c	/^    size_t free_cnt;            \/* Free blocks; pages in big block. *\/$/;"	m	struct:arena	file:
 free_elem	src/threads/malloc.c	/^    struct list_elem free_elem; \/* Free list element. *\/$/;"	m	struct:block	typeref:struct:block::list_elem	file:
+free_frame_all	src/vm/frame.c	/^free_frame_all (){$/;"	f
 free_frame_single	src/vm/frame.c	/^free_frame_single (void * vaddr){$/;"	f
 free_list	src/threads/malloc.c	/^    struct list free_list;      \/* List of free blocks. *\/$/;"	m	struct:desc	typeref:struct:desc::list	file:
 free_map	src/filesys/free-map.c	/^static struct bitmap *free_map;      \/* Free map, one bit per sector. *\/$/;"	v	typeref:struct:bitmap	file:
@@ -1092,6 +1093,7 @@ hash_next	src/lib/kernel/hash.c	/^hash_next (struct hash_iterator *i)$/;"	f
 hash_replace	src/lib/kernel/hash.c	/^hash_replace (struct hash *h, struct hash_elem *new) $/;"	f
 hash_size	src/lib/kernel/hash.c	/^hash_size (struct hash *h) $/;"	f
 hash_string	src/lib/kernel/hash.c	/^hash_string (const char *s_) $/;"	f
+have_page	src/vm/frame.h	/^  bool have_page;$/;"	m	struct:frame
 head	src/devices/intq.h	/^    int head;                   \/* New data is written here. *\/$/;"	m	struct:intq
 head	src/lib/kernel/list.h	/^    struct list_elem head;      \/* List head. *\/$/;"	m	struct:list	typeref:struct:list::list_elem
 heapify	src/lib/stdlib.c	/^heapify (unsigned char *array, size_t i, size_t cnt, size_t size,$/;"	f	file:
@@ -1130,7 +1132,7 @@ inb	src/threads/io.h	/^inb (uint16_t port)$/;"	f
 init	src/devices/vga.c	/^init (void)$/;"	f	file:
 init	src/tests/vm/page-merge-seq.c	/^init (void) $/;"	f	file:
 init	src/tests/vm/parallel-merge.c	/^init (void) $/;"	f	file:
-init_frame_list	src/vm/frame.c	/^void init_frame_list(void){$/;"	f
+init_frame_list	src/vm/frame.c	/^void init_frame_list(void)$/;"	f
 init_grammar	src/examples/insult.c	/^init_grammar (void)$/;"	f	file:
 init_page_dir	src/threads/init.c	/^uint32_t *init_page_dir;$/;"	v
 init_poll	src/devices/serial.c	/^init_poll (void) $/;"	f	file:
@@ -1320,6 +1322,7 @@ load_kernel	src/threads/loader.S	/^load_kernel:$/;"	l
 load_lazy	src/vm/page.c	/^bool load_lazy (struct page * lazy_page){$/;"	f
 load_segment	src/userprog/process.c	/^load_segment (struct file *file, off_t ofs, uint8_t *upage,$/;"	f	file:
 load_success	src/threads/thread.h	/^  bool load_success;            $/;"	m	struct:child_info
+load_swap	src/vm/page.c	/^bool load_swap (struct page * page)$/;"	f
 load_thread	src/tests/threads/mlfqs-fair.c	/^load_thread (void *ti_) $/;"	f	file:
 load_thread	src/tests/threads/mlfqs-load-60.c	/^load_thread (void *aux UNUSED) $/;"	f	file:
 load_thread	src/tests/threads/mlfqs-load-avg.c	/^load_thread (void *seq_no_) $/;"	f	file:
@@ -1412,8 +1415,10 @@ malloc	src/threads/malloc.c	/^malloc (size_t size) $/;"	f
 malloc_init	src/threads/malloc.c	/^malloc_init (void) $/;"	f
 map_key	src/devices/kbd.c	/^map_key (const struct keymap k[], unsigned scancode, uint8_t *c) $/;"	f	file:
 mapid	src/vm/page.h	/^  mapid_t mapid;$/;"	m	struct:page
+mapid2page	src/vm/page.c	/^struct page * mapid2page (struct sup_page * sp, mapid_t mapping){$/;"	f
 mapid_t	src/lib/user/syscall.h	/^typedef int mapid_t;$/;"	t
 mapid_t	src/userprog/syscall.h	/^typedef int mapid_t;$/;"	t
+mapped	src/threads/thread.h	/^  bool mapped;$/;"	m	struct:file_des
 matmult_SRC	src/examples/Makefile	/^matmult_SRC = matmult.c$/;"	m
 max	src/utils/Pintos.pm	/^sub max {$/;"	s
 max_length	src/lib/stdio.c	/^    int max_length;     \/* Max length of output string. *\/$/;"	m	struct:vsnprintf_aux	file:
@@ -1518,9 +1523,14 @@ p_vaddr	src/userprog/process.c	/^    Elf32_Addr p_vaddr;$/;"	m	struct:Elf32_Phdr
 pack_chs	src/utils/Pintos.pm	/^sub pack_chs {$/;"	s
 padding	src/lib/ustar.c	/^    char padding[12];           \/* Pad to 512 bytes. *\/$/;"	m	struct:ustar_header	file:
 page	src/vm/page.h	/^struct page$/;"	s
+page_after_swap	src/vm/page.c	/^void page_after_swap (struct page * p)$/;"	f
+page_backup	src/vm/page.c	/^void page_backup (mapid_t mapping){$/;"	f
+page_before_swap	src/vm/page.c	/^void page_before_swap (struct page * p)$/;"	f
 page_fault	src/userprog/exception.c	/^page_fault (struct intr_frame *f) $/;"	f	file:
 page_fault_cnt	src/userprog/exception.c	/^static long long page_fault_cnt;$/;"	v	file:
 page_fault_lock	src/userprog/exception.c	/^static struct lock page_fault_lock;$/;"	v	typeref:struct:lock	file:
+page_first	src/vm/page.c	/^struct page * page_first (struct sup_page * sp, bool user)$/;"	f
+page_free	src/vm/page.c	/^void page_free (struct page * p)$/;"	f
 page_from_pool	src/threads/palloc.c	/^page_from_pool (const struct pool *pool, void *page) $/;"	f	file:
 page_hash	src/vm/page.c	/^page_hash (const struct hash_elem *p_, void *aux UNUSED)$/;"	f
 page_less	src/vm/page.c	/^page_less (const struct hash_elem *a_, const struct hash_elem *b_,$/;"	f
@@ -1529,6 +1539,7 @@ page_modified	src/vm/page.c	/^void page_modified (struct page * p){$/;"	f
 page_table	src/vm/page.h	/^  struct hash page_table;$/;"	m	struct:sup_page	typeref:struct:sup_page::hash
 page_table_clean	src/vm/page.c	/^void page_table_clean (struct sup_page * sp){$/;"	f
 page_unmap	src/vm/page.c	/^void page_unmap (mapid_t mapping){$/;"	f
+page_unmodified	src/vm/page.c	/^void page_unmodified (struct page * p){$/;"	f
 page_visited	src/vm/page.c	/^void page_visited (struct page * p){$/;"	f
 pagedir	src/threads/thread.h	/^    uint32_t *pagedir;                  \/* Page directory. *\/$/;"	m	struct:thread
 pagedir_activate	src/userprog/pagedir.c	/^pagedir_activate (uint32_t *pd) $/;"	f
@@ -1724,6 +1735,7 @@ seg_granularity	src/userprog/gdt.c	/^enum seg_granularity$/;"	g	file:
 select_device	src/devices/ide.c	/^select_device (const struct ata_disk *d)$/;"	f	file:
 select_device_wait	src/devices/ide.c	/^select_device_wait (const struct ata_disk *d) $/;"	f	file:
 select_sector	src/devices/ide.c	/^select_sector (struct ata_disk *d, block_sector_t sec_no)$/;"	f	file:
+select_victim	src/vm/swap.c	/^struct page * select_victim ()$/;"	f
 sema	src/tests/threads/priority-donate-sema.c	/^    struct semaphore sema;$/;"	m	struct:lock_and_sema	typeref:struct:lock_and_sema::semaphore	file:
 sema	src/tests/threads/priority-sema.c	/^static struct semaphore sema;$/;"	v	typeref:struct:semaphore	file:
 sema_down	src/threads/synch.c	/^sema_down (struct semaphore *sema) $/;"	f
@@ -1786,6 +1798,7 @@ sleeper	src/tests/threads/alarm-simultaneous.c	/^sleeper (void *test_) $/;"	f	fi
 sleeper	src/tests/threads/alarm-wait.c	/^sleeper (void *t_) $/;"	f	file:
 smod64	src/lib/arithmetic.c	/^smod64 (int64_t n, int64_t d)$/;"	f	file:
 snprintf	src/lib/stdio.c	/^snprintf (char *buffer, size_t buf_size, const char *format, ...) $/;"	f
+solo_frame_single	src/vm/frame.c	/^solo_frame_single (void * vaddr){$/;"	f
 sort	src/lib/stdlib.c	/^sort (void *array, size_t cnt, size_t size,$/;"	f
 sort_chunks	src/tests/vm/page-merge-seq.c	/^sort_chunks (void)$/;"	f	file:
 sort_chunks	src/tests/vm/parallel-merge.c	/^sort_chunks (const char *subprocess, int exit_status)$/;"	f	file:
@@ -1842,8 +1855,13 @@ swap	src/lib/kernel/list.c	/^swap (struct list_elem **a, struct list_elem **b) $
 swap	src/tests/lib.c	/^swap (void *a_, void *b_, size_t size) $/;"	f	file:
 swap	src/tests/vm/qsort.c	/^swap (unsigned char *a, unsigned char *b) $/;"	f	file:
 swap_bdev_name	src/threads/init.c	/^static const char *swap_bdev_name;$/;"	v	file:
+swap_bitmap	src/vm/swap.c	/^static struct bitmap * swap_bitmap;$/;"	v	typeref:struct:bitmap	file:
+swap_block	src/vm/swap.c	/^swap_block (struct page * p)$/;"	f
 swap_byte	src/lib/random.c	/^swap_byte (uint8_t *a, uint8_t *b) $/;"	f	file:
 swap_byte	src/tests/arc4.c	/^swap_byte (uint8_t *a, uint8_t *b)$/;"	f	file:
+swap_idx	src/vm/page.h	/^  block_sector_t swap_idx;$/;"	m	struct:page
+swap_init	src/vm/swap.c	/^void swap_init(){$/;"	f
+swap_unblock	src/vm/swap.c	/^swap_unblock (struct page * p)$/;"	f
 swapped	src/vm/page.h	/^  bool swapped;$/;"	m	struct:page
 switch_entry	src/threads/switch.S	/^switch_entry:$/;"	l
 switch_entry_frame	src/threads/switch.h	/^struct switch_entry_frame$/;"	s
@@ -2186,7 +2204,7 @@ vga_putc	src/devices/vga.c	/^vga_putc (int c)$/;"	f
 vgaromimage	src/utils/pintos	/^vgaromimage: file=\\$BXSHARE\/VGABIOS-lgpl-latest$/;"	l
 vhprintf	src/lib/user/console.c	/^vhprintf (int handle, const char *format, va_list args) $/;"	f
 vhprintf_aux	src/lib/user/console.c	/^struct vhprintf_aux $/;"	s	file:
-vm_SRC	src/vm/build/Makefile	/^vm_SRC = vm\/frame.c$/;"	m
+vm_SRC	src/vm/build/Makefile	/^vm_SRC 	= vm\/frame.c$/;"	m
 vmsg	src/tests/lib.c	/^vmsg (const char *format, va_list args, const char *suffix) $/;"	f	file:
 vprintf	src/lib/kernel/console.c	/^vprintf (const char *format, va_list args) $/;"	f
 vprintf	src/lib/user/console.c	/^vprintf (const char *format, va_list args) $/;"	f

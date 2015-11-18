@@ -6,32 +6,51 @@
 #include "threads/synch.h"
 #include "vm/frame.h"
 #include "vm/page.h"
+#include "vm/swap.h"
 
 static struct list frame_list; 
-
-#define PAGE_ADDR 0xfffff000 /* Address bits*/
+static struct lock frame_lock;
 
 void init_frame_list(void)
 {
   list_init (&frame_list);
+  lock_init (&frame_lock);
 }
 
 void *
 get_frame_single (){
 
+  lock_acquire (&frame_lock);
   void * mem_new = palloc_get_page (PAL_USER); 
   struct frame * single = (struct frame *) malloc (sizeof (struct frame));
+  struct list_elem * e;
 
   if (mem_new == NULL){    /* swap */
-    if(!single)
-      free(single);
+    struct page * victim = select_victim ();
+
+ //   printf("victim addr = %p\n",victim->addr);
+    ASSERT (victim != NULL);
+//  go to swapblock (victim) function
+    swap_block (victim);
+    pagedir_clear_page (thread_current ()->pagedir, victim->addr);
+    free_frame_single (victim->frame_addr);
+    page_before_swap (victim);
+    mem_new = palloc_get_page (PAL_USER);
+//    mem_new = victim->frame_addr;
+
+    ASSERT (mem_new != NULL);
+
+    
+/*    if(!single)
+      free(single);*/
   }
 
-  else{
-    single->vaddr = mem_new; // & PAGE_ADDR);
-    single->have_page = true;
-    list_push_back (&frame_list, &single->felem);
-  }
+  single->vaddr = mem_new; // & PAGE_ADDR);
+  single->have_page = true;
+  list_push_back (&frame_list, &single->felem);
+
+  lock_release (&frame_lock);
+//  puts("frame ok?");
 
   return mem_new;
 

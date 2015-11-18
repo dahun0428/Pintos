@@ -162,15 +162,18 @@ page_fault (struct intr_frame *f)
   void * esp = user ? f->esp : thread_current()->esp;
   int diff = (int)esp - (int) fault_addr;
 
-  if (user && is_kernel_vaddr (fault_addr))
+  if (user && is_kernel_vaddr (fault_addr) || !not_present)
+  {
     goto bad_req;
-
+  }
   struct page * p = vaddr2page ( &thread_current ()->p_hash, fault_addr);
+//  printf("user: %d\nnotp: %d\ndiff: %d\nesp: %p\np: %p\nfaultaddr: %p\n",user,not_present,diff,esp,p,fault_addr);
+
   
   if (p != NULL ){
     if (load_lazy (p)){
       if (write && user){
-        page_modified (p);
+   //     page_modified (p);
       }
       lock_release (&page_fault_lock);
       return ;
@@ -178,7 +181,7 @@ page_fault (struct intr_frame *f)
   }
 
   else if (p == NULL && not_present && ((diff <= 32 || esp == 0) && diff >= -8388608)&& diff != 0){
-    
+
     new_stack_page (f, fault_addr, user);
     lock_release (&page_fault_lock);
     return;
@@ -187,7 +190,9 @@ page_fault (struct intr_frame *f)
 
 bad_req:
   
+  //printf("%lld\n",page_fault_cnt);
 
+  //printf("user: %d\nnotp: %d\ndiff: %d\nesp: %p\np: %p\nfaultaddr: %p\n",user,not_present,diff,esp,p,fault_addr);
   lock_release (&page_fault_lock);
 
   sys_exit(-1);
