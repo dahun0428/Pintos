@@ -9,12 +9,14 @@
 
 //static block_sector_t sector;
 static struct bitmap * swap_bitmap;
+static struct lock swap_lock;
 
 #define MAX_BLOCK_PAGE 500000
 
 void swap_init(){
 //  sector = 0;
   swap_bitmap = bitmap_create (MAX_BLOCK_PAGE);
+  lock_init (&swap_lock);
 }
 struct page * select_victim ()
 {
@@ -22,9 +24,19 @@ struct page * select_victim ()
   struct sup_page * sp = &t->p_hash;
   struct hash_iterator i;
   struct page * victim = NULL;
+  int search_cnt = 0;
 
+  lock_acquire (&swap_lock);
   while (victim == NULL){
 
+    search_cnt++;
+
+    if (search_cnt > 150)
+    {
+      isFullFrame();
+      lock_release (&swap_lock);
+      return NULL;
+    }
     hash_first(&i, &sp->page_table);
     while (hash_next (&i))
     {
@@ -32,8 +44,11 @@ struct page * select_victim ()
       bool accessed =  pagedir_is_accessed (t->pagedir, p->addr);
       bool dirty = pagedir_is_dirty (t->pagedir, p->addr);
 
+
       if(!p->valid)
+      {
         continue;
+      }
 
       if (!accessed && !dirty)
         victim = p;
@@ -56,6 +71,7 @@ struct page * select_victim ()
   }
 
 
+  lock_release (&swap_lock);
   return victim;
 
 }

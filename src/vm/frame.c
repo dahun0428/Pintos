@@ -8,8 +8,10 @@
 #include "vm/page.h"
 #include "vm/swap.h"
 
+
 static struct list frame_list; 
 static struct lock frame_lock;
+static uint32_t frame_cnt = 0;
 
 void init_frame_list(void)
 {
@@ -17,6 +19,25 @@ void init_frame_list(void)
   lock_init (&frame_lock);
 }
 
+
+void 
+set_frame_page (struct page * page)
+{
+  struct list_elem * e;
+
+  for (e = list_begin (&frame_list); e != list_end (&frame_list); e = list_next (e))
+  {
+    struct frame * single = list_entry (e, struct frame, felem);
+
+    if (page->frame_addr == single->vaddr)
+    {
+      single->page = page;
+      return;
+    }
+  }
+
+  
+}
 void *
 get_frame_single (){
 
@@ -29,12 +50,14 @@ get_frame_single (){
     struct page * victim = select_victim ();
 
  //   printf("victim addr = %p\n",victim->addr);
-    ASSERT (victim != NULL);
-//  go to swapblock (victim) function
-    swap_block (victim);
-    pagedir_clear_page (victim->t->pagedir, victim->addr);
-    free_frame_single (victim->frame_addr);
-    page_before_swap (victim);
+    if (victim != NULL)
+    {
+      //  go to swapblock (victim) function
+      swap_block (victim);
+      pagedir_clear_page (victim->t->pagedir, victim->addr);
+      free_frame_single (victim->frame_addr);
+      page_before_swap (victim);
+    }
     mem_new = palloc_get_page (PAL_USER);
 //    mem_new = victim->frame_addr;
 
@@ -46,8 +69,9 @@ get_frame_single (){
   }
 
   single->vaddr = mem_new; // & PAGE_ADDR);
-  single->have_page = true;
+  single->page = NULL;
   list_push_back (&frame_list, &single->felem);
+  frame_cnt++;
 
   lock_release (&frame_lock);
 //  puts("frame ok?");
@@ -70,29 +94,13 @@ free_frame_single (void * vaddr){
       palloc_free_page (single->vaddr);
       list_remove(e);
       free(single);
+      frame_cnt--;
       break;
     }
   }
 
 }
 
-void
-solo_frame_single (void * vaddr){
-  
-  struct list_elem * e;
-
-  for (e = list_begin (&frame_list); e != list_end (&frame_list); e = list_next (e))
-  {
-    struct frame * single = list_entry (e, struct frame, felem);
-
-    if ( single->vaddr == pg_round_down (vaddr) )
-    {
-      single->have_page = false;
-      break;
-    }
-  }
-
-}
 
 void
 free_frame_all (){
@@ -124,3 +132,16 @@ get_frame_vaddr(struct frame * f){
 
 
 
+bool isFullFrame()
+{
+  struct list_elem * e = list_begin (&frame_list);
+
+  struct frame * single = list_entry (e, struct frame, felem);
+  struct page * victim = single->page;
+  swap_block (victim);
+  pagedir_clear_page (victim->t->pagedir, victim->addr);
+  free_frame_single (victim->frame_addr);
+  page_before_swap (victim);
+
+  return true;
+}

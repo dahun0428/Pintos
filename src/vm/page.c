@@ -71,6 +71,7 @@ void * new_stack_page (struct intr_frame *f, void * fault_addr, bool user){
 
   new_page->mapid = -1;
 
+  set_frame_page (new_page);
   lock_init (&new_page->page_lock);
 
   hash_insert (&sup_p->page_table, &new_page->pelem);
@@ -170,6 +171,7 @@ bool load_swap (struct page * page)
   }
   page_after_swap (page);
   page_visited (page);
+  set_frame_page (page);
   // puts("load_swap end");
 
   return true;
@@ -219,6 +221,7 @@ bool load_lazy (struct page * lazy_page){
   lazy_page->loaded = true;
   lazy_page->frame_addr = kpage;
   lazy_page->valid = true;
+  set_frame_page (lazy_page);
   page_visited (lazy_page);
   //  page_after_swap (lazy_page);
 
