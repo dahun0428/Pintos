@@ -32,7 +32,7 @@ get_frame_single (){
     ASSERT (victim != NULL);
 //  go to swapblock (victim) function
     swap_block (victim);
-    pagedir_clear_page (thread_current ()->pagedir, victim->addr);
+    pagedir_clear_page (victim->t->pagedir, victim->addr);
     free_frame_single (victim->frame_addr);
     page_before_swap (victim);
     mem_new = palloc_get_page (PAL_USER);
