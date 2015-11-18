@@ -82,7 +82,7 @@ process_execute (const char *file_name)
     }
   }
   
-  thread_yield();
+  //thread_yield();
   
   // Success
   return tid;
