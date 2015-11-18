@@ -16,6 +16,7 @@ void swap_init(){
 //  sector = 0;
   swap_bitmap = bitmap_create (MAX_BLOCK_PAGE);
 }
+
 struct page * select_victim ()
 {
   struct thread * t =  thread_current ();
@@ -33,7 +34,10 @@ struct page * select_victim ()
       bool dirty = pagedir_is_dirty (t->pagedir, p->addr);
 
       if(!p->valid)
+      {
+//        puts("invalid");
         continue;
+      }
 
       if (!accessed && !dirty)
         victim = p;
@@ -55,9 +59,7 @@ struct page * select_victim ()
     }
   }
 
-
   return victim;
-
 }
 
 void

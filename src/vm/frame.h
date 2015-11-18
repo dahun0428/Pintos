@@ -10,17 +10,18 @@ struct frame {
 
 //  uintptr_t paddr;           /* physical address */
   void * vaddr;           /* virtual address */
-  bool have_page;
+  struct page * apage;
 
   long long last_accessed_tick; /* need? */
 };
 
 void init_frame_list (void);
-void * get_frame_single (void);
+struct frame * get_frame_single (void);
 void free_frame_single (void *);
-void solo_frame_single (void *);
+struct frame * get_frame_struct (void *);
 
-uintptr_t get_frame_paddr (struct frame *);
-void *  get_frame_vaddr (struct frame *);
+
+bool is_frame_full(void);
+//struct page * select_victim();
 
 #endif

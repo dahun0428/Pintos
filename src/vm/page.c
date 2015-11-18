@@ -39,20 +39,20 @@ void * new_stack_page (struct intr_frame *f, void * fault_addr, bool user){
   if (sup_p->stack_page_count > MAX_STACK_PAGE) 
     return NULL;
 
-  void * new_frame = get_frame_single();
+  struct frame * new_frame = get_frame_single();
 
-  memset (new_frame, 0, PGSIZE);
+  memset (new_frame->vaddr, 0, PGSIZE);
   if ( !(pagedir_get_page (cur->pagedir, fault_addr) == NULL &&
-        pagedir_set_page (cur->pagedir, pg_round_down (fault_addr), new_frame, true)) ) 
+        pagedir_set_page (cur->pagedir, pg_round_down (fault_addr), new_frame->vaddr, true)) ) 
   {
-    free_frame_single (new_frame);
+    free_frame_single (new_frame->vaddr);
     return NULL;
   }
 
   struct page * new_page = (struct page *) malloc (sizeof (struct page)); 
   new_page->t = cur;
 
-  new_page->frame_addr = new_frame;
+  new_page->frame_addr = new_frame->vaddr;
   new_page->addr = pg_round_down (fault_addr);
   new_page->valid = true;
   new_page->accessed = true;
@@ -70,15 +70,16 @@ void * new_stack_page (struct intr_frame *f, void * fault_addr, bool user){
   new_page->cur_file = NULL;
 
   new_page->mapid = -1;
+  new_frame->apage = new_page;
 
   lock_init (&new_page->page_lock);
 
   hash_insert (&sup_p->page_table, &new_page->pelem);
   sup_p->stack_page_count++;
 
-  page_visited (new_page);
+//  page_visited (new_page);
 
-  return new_frame;
+  return new_frame->vaddr;
 }
 
 void sup_page_init (struct sup_page * p_hash){
@@ -160,8 +161,9 @@ bool load_swap (struct page * page)
   bool writable = page->writable;
 
   //  printf("in load_swap %p\n",page->addr);
-  page->frame_addr = get_frame_single();
+  struct frame * single = get_frame_single();
   swap_unblock (page);
+  page->frame_addr = single->vaddr;
 
   if ( !(pagedir_set_page (cur->pagedir, page->addr, page->frame_addr, writable)) ) 
   {
@@ -169,7 +171,8 @@ bool load_swap (struct page * page)
     return false;
   }
   page_after_swap (page);
-  page_visited (page);
+//  page_visited (page);
+  single->apage = page;
   // puts("load_swap end");
 
   return true;
@@ -187,7 +190,8 @@ bool load_lazy (struct page * lazy_page){
   if (lazy_page->swapped)
     return load_swap (lazy_page);
 
-  void * kpage = get_frame_single ();
+  struct frame * single = get_frame_single();
+  void * kpage = single->vaddr;
   void * upage = lazy_page->addr;
   struct file * file = lazy_page->cur_file;//file_reopen (lazy_page->cur_file);
   off_t ofs = lazy_page->file_ofs;
@@ -219,7 +223,8 @@ bool load_lazy (struct page * lazy_page){
   lazy_page->loaded = true;
   lazy_page->frame_addr = kpage;
   lazy_page->valid = true;
-  page_visited (lazy_page);
+  single->apage = lazy_page;
+//  page_visited (lazy_page);
   //  page_after_swap (lazy_page);
 
   return true;
@@ -247,6 +252,7 @@ struct page * mapid2page (struct sup_page * sp, mapid_t mapping){
   struct hash_iterator i;
 
   hash_first(&i, &sp->page_table);
+
   while (hash_next (&i))
   {
     struct page * p = hash_entry (hash_cur (&i), struct page, pelem);
@@ -287,16 +293,12 @@ struct page * page_first (struct sup_page * sp, bool user)
 
 void page_visited (struct page * p){
 
-  p->accessed = true;
   pagedir_set_accessed (p->t->pagedir, p->addr, true);
-  p->ref = true;
 }
 
 void page_modified (struct page * p){
 
-  p->dirty = true;
   pagedir_set_dirty (p->t->pagedir, p->addr, true);
-  p->modified = true;
   page_visited (p);
 }
 
@@ -333,7 +335,7 @@ void page_unmap (mapid_t mapping){
       break;
     }
 
-    else if (pagedir_is_dirty (thread_current ()->pagedir, found->addr))
+    else if (pagedir_is_dirty (found->t->pagedir, found->addr))
     {
       //      if (file_tell (found->cur_file) != (int) (found->file_ofs))
       //      {
@@ -341,7 +343,7 @@ void page_unmap (mapid_t mapping){
       file_write (found->cur_file, found->addr, found->read_bytes);
       //    }
       file_close (found->cur_file);
-      pagedir_clear_page (thread_current ()->pagedir, found->addr);
+      pagedir_clear_page (found->t->pagedir, found->addr);
       free_frame_single (found->frame_addr); 
       hash_delete (&sp->page_table, &found->pelem);
       page_free (found);
@@ -349,25 +351,26 @@ void page_unmap (mapid_t mapping){
     else
     {
       file_close (found->cur_file);
-      pagedir_clear_page (thread_current ()->pagedir, found->addr);
+      pagedir_clear_page (found->t->pagedir, found->addr);
       free_frame_single (found->frame_addr); 
       hash_delete (&sp->page_table, &found->pelem);
       page_free (found);
     }
     found = NULL;
   }
+  
   return;
 }
 
 void page_backup (struct page * p){
 
   struct hash_iterator i;
-  struct sup_page * sp = &thread_current ()->p_hash;
+  struct sup_page * sp = &p->t->p_hash;
   struct page * found;
   mapid_t mapping = p->mapid;
   //  bool not_finish = true;
 
-  if (!pagedir_is_dirty (thread_current ()->pagedir, p->addr))
+  if (!pagedir_is_dirty (p->t->pagedir, p->addr))
     return;
 
   if (mapping == -1)
@@ -376,7 +379,7 @@ void page_backup (struct page * p){
     file_write (p->cur_file, p->addr, p->read_bytes);
 
 
-    page_unmodified (p);
+   // page_unmodified (p);
 
   }
 
@@ -403,13 +406,13 @@ void page_backup (struct page * p){
 
       else
       {
-        if (pagedir_is_dirty (thread_current ()->pagedir, found->addr))
+        if (pagedir_is_dirty (found->t->pagedir, found->addr))
         {
           file_seek (found->cur_file, found->file_ofs);
           file_write (found->cur_file, found->addr, found->read_bytes);
         }
 
-        page_unmodified (found);
+        //page_unmodified (found);
         //      pagedir_clear_page (thread_current ()->pagedir, found->addr);
       }
       found = NULL;
