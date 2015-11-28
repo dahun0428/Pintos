@@ -110,6 +110,11 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 
+    /* Pintos #1 */
+    struct list_elem timer_elem;
+    int64_t wakeup_ticks;
+
+    /* Pintos #2 */
     struct thread * parent;
     int child_status;
     struct list child_list;
