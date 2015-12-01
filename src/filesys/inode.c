@@ -10,9 +10,6 @@
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
 
-/* Declaration of buffer cache */
-typedef char BLOCK_CACHE[512];
-static BLOCK_CACHE buffer_cache[64];
 
 /* On-disk inode.
    Must be exactly BLOCK_SECTOR_SIZE bytes long. */
