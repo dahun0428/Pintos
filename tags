@@ -10,9 +10,9 @@ ACTUAL	src/tests/vm/mmap-close.c	10;"	d	file:
 ACTUAL	src/tests/vm/mmap-unmap.c	9;"	d	file:
 ACTUAL	src/tests/vm/mmap-write.c	11;"	d	file:
 ARENA_MAGIC	src/threads/malloc.c	47;"	d	file:
-ARG1	src/userprog/syscall.c	15;"	d	file:
-ARG2	src/userprog/syscall.c	16;"	d	file:
-ARG3	src/userprog/syscall.c	17;"	d	file:
+ARG1	src/userprog/syscall.c	16;"	d	file:
+ARG2	src/userprog/syscall.c	17;"	d	file:
+ARG3	src/userprog/syscall.c	18;"	d	file:
 ASSERT	src/lib/debug.h	27;"	d
 ASSERT	src/lib/debug.h	31;"	d
 ASSERT	src/lib/debug.h	37;"	d
@@ -30,11 +30,14 @@ BLOCK_RAW	src/devices/block.h	/^    BLOCK_RAW = BLOCK_ROLE_CNT,  \/* "Raw" devic
 BLOCK_ROLE_CNT	src/devices/block.h	/^    BLOCK_ROLE_CNT,$/;"	e	enum:block_type
 BLOCK_SCRATCH	src/devices/block.h	/^    BLOCK_SCRATCH,               \/* Scratch. *\/$/;"	e	enum:block_type
 BLOCK_SECTOR_SIZE	src/devices/block.h	11;"	d
+BLOCK_SIZE	src/filesys/plan_extensible.c	/^"double indirect, 128 * 128 * BLOCK_SIZE;$/;"	v
 BLOCK_SIZE	src/tests/filesys/base/lg-random.c	5;"	d	file:
 BLOCK_SIZE	src/tests/filesys/base/lg-seq-block.c	6;"	d	file:
 BLOCK_SIZE	src/tests/filesys/base/sm-random.c	5;"	d	file:
 BLOCK_SIZE	src/tests/filesys/base/sm-seq-block.c	6;"	d	file:
 BLOCK_SWAP	src/devices/block.h	/^    BLOCK_SWAP,                  \/* Swap. *\/$/;"	e	enum:block_type
+BUFFER_CACHE_MAX	src/filesys/cache.h	8;"	d
+BUFFER_NOT_FOUND	src/filesys/cache.h	7;"	d
 BUF_SIZE	src/tests/filesys/base/syn-read.h	4;"	d
 BUF_SIZE	src/tests/filesys/base/syn-write.h	6;"	d
 BUF_SIZE	src/tests/filesys/extended/syn-rw.h	6;"	d
@@ -51,9 +54,9 @@ CHAR_MAX	src/lib/limits.h	15;"	d
 CHAR_MIN	src/lib/limits.h	11;"	d
 CHAR_MIN	src/lib/limits.h	14;"	d
 CHECK	src/tests/lib.h	29;"	d
-CHECK_ARG1	src/userprog/syscall.c	19;"	d	file:
-CHECK_ARG2	src/userprog/syscall.c	20;"	d	file:
-CHECK_ARG3	src/userprog/syscall.c	21;"	d	file:
+CHECK_ARG1	src/userprog/syscall.c	20;"	d	file:
+CHECK_ARG2	src/userprog/syscall.c	21;"	d	file:
+CHECK_ARG3	src/userprog/syscall.c	22;"	d	file:
 CHILD_CNT	src/tests/filesys/base/syn-read.c	14;"	d	file:
 CHILD_CNT	src/tests/filesys/base/syn-write.h	4;"	d
 CHILD_CNT	src/tests/filesys/extended/syn-rw.c	12;"	d	file:
@@ -87,6 +90,8 @@ Copy	src/tests/Algorithm/Diff.pm	/^sub Copy$/;"	s
 DATA_REG	src/devices/kbd.c	12;"	d	file:
 DATA_SIZE	src/tests/vm/page-merge-seq.c	16;"	d	file:
 DATA_SIZE	src/tests/vm/parallel-merge.c	15;"	d	file:
+DEPENDS	src/filesys/build/Makefile	/^DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))$/;"	m
+DEPENDS	src/threads/build/Makefile	/^DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))$/;"	m
 DEPENDS	src/userprog/build/Makefile	/^DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))$/;"	m
 DEVICES_BLOCK_H	src/devices/block.h	2;"	d
 DEVICES_IDE_H	src/devices/ide.h	2;"	d
@@ -120,6 +125,7 @@ Elf32_Off	src/userprog/process.c	/^typedef uint32_t Elf32_Word, Elf32_Addr, Elf3
 Elf32_Phdr	src/userprog/process.c	/^struct Elf32_Phdr$/;"	s	file:
 Elf32_Word	src/userprog/process.c	/^typedef uint32_t Elf32_Word, Elf32_Addr, Elf32_Off;$/;"	t	file:
 FCR_REG	src/devices/serial.c	31;"	d	file:
+FILESYS_CACHE_H	src/filesys/cache.h	2;"	d
 FILESYS_DIRECTORY_H	src/filesys/directory.h	2;"	d
 FILESYS_FILESYS_H	src/filesys/filesys.h	2;"	d
 FILESYS_FILE_H	src/filesys/file.h	2;"	d
@@ -145,7 +151,7 @@ IER_RECV	src/devices/serial.c	37;"	d	file:
 IER_REG	src/devices/serial.c	23;"	d	file:
 IER_XMIT	src/devices/serial.c	38;"	d	file:
 IIR_REG	src/devices/serial.c	30;"	d	file:
-INODE_MAGIC	src/filesys/inode.c	11;"	d	file:
+INODE_MAGIC	src/filesys/inode.c	12;"	d	file:
 INT	src/lib/stdio.c	/^        INT = 3,                \/* (none) *\/$/;"	e	enum:printf_conversion::__anon3	file:
 INT16_MAX	src/lib/stdint.h	9;"	d
 INT16_MIN	src/lib/stdint.h	10;"	d
@@ -225,6 +231,8 @@ NO_RETURN	src/lib/debug.h	8;"	d
 NO_RETURN	src/userprog/process.c	/^static thread_func start_process NO_RETURN;$/;"	v	file:
 NULL	src/lib/stddef.h	4;"	d
 Next	src/tests/Algorithm/Diff.pm	/^sub Next {$/;"	s
+OBJECTS	src/filesys/build/Makefile	/^OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))$/;"	m
+OBJECTS	src/threads/build/Makefile	/^OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))$/;"	m
 OBJECTS	src/userprog/build/Makefile	/^OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))$/;"	m
 PACKED	src/lib/packed.h	8;"	d
 PACKED	src/lib/ustar.c	/^PACKED;$/;"	v	typeref:struct:ustar_header
@@ -377,11 +385,15 @@ SIZE	src/tests/vm/page-shuffle.c	10;"	d	file:
 SIZET	src/lib/stdio.c	/^        SIZET = 8               \/* z *\/$/;"	e	enum:printf_conversion::__anon3	file:
 SIZE_MAX	src/lib/stdint.h	49;"	d
 SORT_SIZE	src/examples/bubsort.c	12;"	d	file:
+SOURCES	src/filesys/build/Makefile	/^SOURCES = $(foreach dir,$(KERNEL_SUBDIRS),$($(dir)_SRC))$/;"	m
+SOURCES	src/threads/build/Makefile	/^SOURCES = $(foreach dir,$(KERNEL_SUBDIRS),$($(dir)_SRC))$/;"	m
 SOURCES	src/userprog/build/Makefile	/^SOURCES = $(foreach dir,$(KERNEL_SUBDIRS),$($(dir)_SRC))$/;"	m
 SPACE	src/lib/stdio.c	/^        SPACE = 1 << 2,         \/* ' ' *\/$/;"	e	enum:printf_conversion::__anon2	file:
 SPEAKER_GATE_ENABLE	src/devices/speaker.c	11;"	d	file:
 SPEAKER_PORT_GATE	src/devices/speaker.c	8;"	d	file:
 SRCDIR	src/examples/Makefile	/^SRCDIR = ..$/;"	m
+SRCDIR	src/filesys/build/Makefile	/^SRCDIR = ..\/..$/;"	m
+SRCDIR	src/threads/build/Makefile	/^SRCDIR = ..\/..$/;"	m
 SRCDIR	src/userprog/build/Makefile	/^SRCDIR = ..\/..$/;"	m
 STA_BSY	src/devices/ide.c	34;"	d	file:
 STA_DRDY	src/devices/ide.c	35;"	d	file:
@@ -535,19 +547,31 @@ __printf	src/lib/stdio.c	/^__printf (const char *format,$/;"	f
 __udivdi3	src/lib/arithmetic.c	/^__udivdi3 (unsigned long long n, unsigned long long d) $/;"	f
 __umoddi3	src/lib/arithmetic.c	/^__umoddi3 (unsigned long long n, unsigned long long d) $/;"	f
 __vprintf	src/lib/stdio.c	/^__vprintf (const char *format, va_list args,$/;"	f
+_end	src/filesys/build/threads/kernel.lds.s	/^  _end = .;$/;"	d
+_end	src/threads/build/threads/kernel.lds.s	/^  _end = .;$/;"	d
 _end	src/threads/kernel.lds.S	/^  _end = .;$/;"	d
 _end	src/userprog/build/threads/kernel.lds.s	/^  _end = .;$/;"	d
+_end_bss	src/filesys/build/threads/kernel.lds.s	/^  _end_bss = .;$/;"	d
+_end_bss	src/threads/build/threads/kernel.lds.s	/^  _end_bss = .;$/;"	d
 _end_bss	src/threads/kernel.lds.S	/^  _end_bss = .;$/;"	d
 _end_bss	src/userprog/build/threads/kernel.lds.s	/^  _end_bss = .;$/;"	d
+_end_kernel_text	src/filesys/build/threads/kernel.lds.s	/^       _end_kernel_text = .; }$/;"	d
+_end_kernel_text	src/threads/build/threads/kernel.lds.s	/^       _end_kernel_text = .; }$/;"	d
 _end_kernel_text	src/threads/kernel.lds.S	/^	      _end_kernel_text = .; }$/;"	d
 _end_kernel_text	src/userprog/build/threads/kernel.lds.s	/^       _end_kernel_text = .; }$/;"	d
 _longestCommonSubsequence	src/tests/Algorithm/Diff.pm	/^sub _longestCommonSubsequence$/;"	s
 _replaceNextLargerWith	src/tests/Algorithm/Diff.pm	/^sub _replaceNextLargerWith$/;"	s
+_signature	src/filesys/build/threads/kernel.lds.s	/^     _signature = .; LONG(0xaa55aa55) }$/;"	d
+_signature	src/threads/build/threads/kernel.lds.s	/^     _signature = .; LONG(0xaa55aa55) }$/;"	d
 _signature	src/threads/kernel.lds.S	/^	    _signature = .; LONG(0xaa55aa55) }$/;"	d
 _signature	src/userprog/build/threads/kernel.lds.s	/^     _signature = .; LONG(0xaa55aa55) }$/;"	d
+_start	src/filesys/build/threads/kernel.lds.s	/^  _start = 0xc0000000 + 0x20000;$/;"	d
 _start	src/lib/user/entry.c	/^_start (int argc, char *argv[]) $/;"	f
+_start	src/threads/build/threads/kernel.lds.s	/^  _start = 0xc0000000 + 0x20000;$/;"	d
 _start	src/threads/kernel.lds.S	/^  _start = LOADER_PHYS_BASE + LOADER_KERN_BASE;$/;"	d
 _start	src/userprog/build/threads/kernel.lds.s	/^  _start = 0xc0000000 + 0x20000;$/;"	d
+_start_bss	src/filesys/build/threads/kernel.lds.s	/^  _start_bss = .;$/;"	d
+_start_bss	src/threads/build/threads/kernel.lds.s	/^  _start_bss = .;$/;"	d
 _start_bss	src/threads/kernel.lds.S	/^  _start_bss = .;$/;"	d
 _start_bss	src/userprog/build/threads/kernel.lds.s	/^  _start_bss = .;$/;"	d
 _withPositionsOfInInterval	src/tests/Algorithm/Diff.pm	/^sub _withPositionsOfInInterval$/;"	s
@@ -556,6 +580,7 @@ a_thread_func	src/tests/threads/priority-donate-multiple.c	/^a_thread_func (void
 a_thread_func	src/tests/threads/priority-donate-multiple.c	/^static thread_func a_thread_func;$/;"	v	file:
 a_thread_func	src/tests/threads/priority-donate-multiple2.c	/^a_thread_func (void *lock_) $/;"	f	file:
 a_thread_func	src/tests/threads/priority-donate-multiple2.c	/^static thread_func a_thread_func;$/;"	v	file:
+accessed	src/filesys/cache.h	/^    bool accessed;$/;"	m	struct:buffer_cache
 acquire1_thread_func	src/tests/threads/priority-donate-one.c	/^acquire1_thread_func (void *lock_) $/;"	f	file:
 acquire1_thread_func	src/tests/threads/priority-donate-one.c	/^static thread_func acquire1_thread_func;$/;"	v	file:
 acquire2_thread_func	src/tests/threads/priority-donate-one.c	/^acquire2_thread_func (void *lock_) $/;"	f	file:
@@ -566,6 +591,8 @@ acquire_thread_func	src/tests/threads/priority-donate-lower.c	/^static thread_fu
 active_pd	src/userprog/pagedir.c	/^active_pd (void) $/;"	f	file:
 add_char	src/lib/user/console.c	/^add_char (char c, void *aux_) $/;"	f	file:
 add_file	src/utils/pintos	/^sub add_file {$/;"	s
+add_xn	src/threads/fixed-point.c	/^fixed_p add_xn(fixed_p x, int n){$/;"	f
+add_xy	src/threads/fixed-point.c	/^fixed_p add_xy(fixed_p x, fixed_p y){$/;"	f
 adj	src/examples/insult.c	/^char *adj[] = { "3", "4", "2", ",", "1" };$/;"	v
 adj1	src/examples/insult.c	/^char *adj1[] =$/;"	v
 adj1Loc	src/examples/insult.c	/^char adj1Loc[] =$/;"	v
@@ -580,6 +607,8 @@ afflictors	src/examples/insult.c	/^char *afflictors[] =$/;"	v
 afflictorsLoc	src/examples/insult.c	/^char afflictorsLoc[] = { 6, 0, 2, 4, 6, 8, 12, 16 };$/;"	v
 alarm_priority_thread	src/tests/threads/alarm-priority.c	/^alarm_priority_thread (void *aux UNUSED) $/;"	f	file:
 alarm_priority_thread	src/tests/threads/alarm-priority.c	/^static thread_func alarm_priority_thread;$/;"	v	file:
+all	src/filesys/plan_synch.c	/^A read of a file by one process when the file is being written by another process is allowed to show that none, all, or part of the write has completed. (However, after the write system call returns to its caller, all subsequent readers must see the change.) $/;"	v
+all	src/filesys/plan_synch.c	/^Suppose processes A and B both have a given file open and both are positioned at end-of-file. If A reads and B writes the file at the same time, A may read all, part, or none of what B writes. $/;"	v
 all_blocks	src/devices/block.c	/^static struct list all_blocks = LIST_INITIALIZER (all_blocks);$/;"	v	typeref:struct:list	file:
 all_list	src/threads/thread.c	/^static struct list all_list;$/;"	v	typeref:struct:list	file:
 all_list	src/threads/thread_bak.c	/^static struct list all_list;$/;"	v	typeref:struct:list	file:
@@ -659,6 +688,7 @@ bitmap_write	src/lib/kernel/bitmap.c	/^bitmap_write (const struct bitmap *b, str
 bits	src/lib/kernel/bitmap.c	/^    elem_type *bits;    \/* Elements that represent bits. *\/$/;"	m	struct:bitmap	file:
 block	src/devices/block.c	/^struct block$/;"	s	file:
 block	src/devices/partition.c	/^    struct block *block;                \/* Underlying block device. *\/$/;"	m	struct:partition	typeref:struct:partition::block	file:
+block	src/filesys/plan_synch.c	/^Operations on different cache blocks must be independent. In particular, when I\/O is required on a particular block, operations on other blocks that do not require I\/O should proceed without having to wait for the I\/O to complete.$/;"	v
 block	src/threads/malloc.c	/^struct block $/;"	s	file:
 block_by_role	src/devices/block.c	/^static struct block *block_by_role[BLOCK_ROLE_CNT];$/;"	v	typeref:struct:block	file:
 block_first	src/devices/block.c	/^block_first (void)$/;"	f
@@ -720,16 +750,31 @@ buf2	src/tests/vm/parallel-merge.c	/^unsigned char buf1[DATA_SIZE], buf2[DATA_SI
 buf_a	src/tests/filesys/extended/grow-two-files.c	/^static char buf_a[FILE_SIZE];$/;"	v	file:
 buf_b	src/tests/filesys/extended/grow-two-files.c	/^static char buf_b[FILE_SIZE];$/;"	v	file:
 buffer	src/devices/input.c	/^static struct intq buffer;$/;"	v	typeref:struct:intq	file:
+buffer_cache	src/filesys/cache.h	/^struct buffer_cache$/;"	s
+buffer_cache_idx	src/filesys/cache.h	/^typedef uint32_t buffer_cache_idx;$/;"	t
+buffer_evict_cache	src/filesys/cache.c	/^buffer_cache_idx buffer_evict_cache (void)$/;"	f
+buffer_find_cache	src/filesys/cache.c	/^struct buffer_cache * buffer_find_cache (block_sector_t idx)$/;"	f
+buffer_get_cache	src/filesys/cache.c	/^struct buffer_cache * buffer_get_cache (block_sector_t sector_idx)$/;"	f
+buffer_write_behind	src/filesys/cache.c	/^void buffer_write_behind (void)$/;"	f
+buffer_write_single	src/filesys/cache.c	/^void buffer_write_single (buffer_cache_idx idx)$/;"	f
 busy_wait	src/devices/timer.c	/^busy_wait (int64_t loops) $/;"	f	file:
 byte_cnt	src/lib/kernel/bitmap.c	/^byte_cnt (size_t bit_cnt)$/;"	f	file:
 byte_to_sector	src/filesys/inode.c	/^byte_to_sector (const struct inode *inode, off_t pos) $/;"	f	file:
+bytes	src/filesys/plan_subdir.c	/^  Reads a directory entry from file descriptor fd, which must represent a directory. If successful, stores the null-terminated file name in name, which must have room for READDIR_MAX_LEN + 1 bytes, and returns true. If no entries are left in the directory, returns false.$/;"	v
 bytes_to_sectors	src/filesys/inode.c	/^bytes_to_sectors (off_t size)$/;"	f	file:
 c_thread_func	src/tests/threads/priority-donate-multiple2.c	/^c_thread_func (void *a_ UNUSED) $/;"	f	file:
 c_thread_func	src/tests/threads/priority-donate-multiple2.c	/^static thread_func c_thread_func;$/;"	v	file:
+cache	src/filesys/plan_buffer.c	/^Modify the file system to keep a cache of file blocks. When a request is made to read or write a block, check to see if it is in the cache, and if so, use the cached data without going to disk. $/;"	v
+cache	src/filesys/plan_buffer.c	/^Otherwise, fetch the block from disk into the cache, evicting an older entry if necessary. You are limited to a cache no greater than 64 sectors in size.$/;"	v
+cache	src/filesys/plan_buffer.c	/^Your cache should be write-behind, that is, keep dirty blocks in the cache, instead of immediately writing modified data to disk. $/;"	v
+cache_init	src/filesys/cache.c	/^void cache_init (void)$/;"	f
+cache_list	src/filesys/cache.c	/^static struct buffer_cache *cache_list[BUFFER_CACHE_MAX];$/;"	v	typeref:struct:buffer_cache	file:
 calc_ustar_chksum	src/utils/pintos	/^sub calc_ustar_chksum {$/;"	s
 calculate_chksum	src/lib/ustar.c	/^calculate_chksum (const struct ustar_header *h)$/;"	f	file:
 calculate_load_avg	src/threads/thread_bak.c	/^void calculate_load_avg(){$/;"	f
 calculate_priority_nice	src/threads/thread_bak.c	/^void calculate_priority_nice(){$/;"	f
+call	src/filesys/plan_subdir.c	/^When one process starts another with the exec system call, the child process inherits its parent's current directory. After that, the two processes' current directories are independent, so that either changing its own current directory has no effect on the other. (This is why, under Unix, the cd command is a shell built-in, not an external program.)$/;"	v
+caller	src/filesys/plan_subdir.c	/^Update the existing system calls so that, anywhere a file name is provided by the caller, an absolute or relative path name may used. The directory separator character is forward slash (\/). You must also support special file names . and .., which have the same meanings as they do in Unix.$/;"	v
 calloc	src/threads/malloc.c	/^calloc (size_t a, size_t b) $/;"	f
 caps_lock	src/devices/kbd.c	/^static bool caps_lock;$/;"	v	file:
 cat_SRC	src/examples/Makefile	/^cat_SRC = cat.c$/;"	m
@@ -783,6 +828,7 @@ compare_ints	src/tests/internal/stdlib.c	/^compare_ints (const void *a_, const v
 compare_output	src/tests/tests.pm	/^sub compare_output {$/;"	s
 compare_priority	src/threads/thread_bak.c	/^compare_priority(struct list_elem * a, struct list_elem *b,void *aux UNUSED){$/;"	f
 compare_thunk	src/lib/stdlib.c	/^compare_thunk (const void *a, const void *b, void *aux) $/;"	f	file:
+complete	src/filesys/plan_buffer.c	/^You should also implement read-ahead, that is, automatically fetch the next block of a file into the cache when one block of a file is read, in case that block is about to be read. Read-ahead is only really useful when done asynchronously. That means, if a process requests disk block 1 from the file, it should block until disk block 1 is read in, but once that read is complete, control should return to the process immediately. The read-ahead request for disk block 2 should be handled asynchronously, in the background.$/;"	v
 completion_wait	src/devices/ide.c	/^    struct semaphore completion_wait;   \/* Up'd by interrupt handler. *\/$/;"	m	struct:channel	typeref:struct:channel::semaphore	file:
 cond_broadcast	src/threads/synch.c	/^cond_broadcast (struct condition *cond, struct lock *lock) $/;"	f
 cond_init	src/threads/synch.c	/^cond_init (struct condition *cond)$/;"	f
@@ -817,6 +863,7 @@ cy	src/devices/vga.c	/^static size_t cx, cy;$/;"	v	file:
 cyl_sectors	src/utils/Pintos.pm	/^sub cyl_sectors {$/;"	s
 daGLoc	src/examples/insult.c	/^char *daGLoc[27];$/;"	v
 daGrammar	src/examples/insult.c	/^char **daGrammar[27];$/;"	v
+data	src/filesys/cache.h	/^    void * data;$/;"	m	struct:buffer_cache
 data	src/filesys/inode.c	/^    struct inode_disk data;             \/* Inode content. *\/$/;"	m	struct:inode	typeref:struct:inode::inode_disk	file:
 dead_child_fd	src/utils/squish-pty.c	/^static int dead_child_fd;$/;"	v	file:
 debug_backtrace	src/lib/debug.c	/^debug_backtrace (void) $/;"	f
@@ -832,12 +879,16 @@ descramble_ata_string	src/devices/ide.c	/^descramble_ata_string (char *string, i
 descs	src/threads/malloc.c	/^static struct desc descs[10];   \/* Descriptors. *\/$/;"	v	typeref:struct:desc	file:
 dev_no	src/devices/ide.c	/^    int dev_no;                 \/* Device 0 or 1 for master or slave. *\/$/;"	m	struct:ata_disk	file:
 devices	src/devices/ide.c	/^    struct ata_disk devices[2];     \/* The devices on this channel. *\/$/;"	m	struct:channel	typeref:struct:channel::ata_disk	file:
+devices_SRC	src/filesys/build/Makefile	/^devices_SRC  = devices\/pit.c		# Programmable interrupt timer chip.$/;"	m
+devices_SRC	src/threads/build/Makefile	/^devices_SRC  = devices\/pit.c		# Programmable interrupt timer chip.$/;"	m
 devices_SRC	src/userprog/build/Makefile	/^devices_SRC  = devices\/pit.c		# Programmable interrupt timer chip.$/;"	m
 devmajor	src/lib/ustar.c	/^    char devmajor[8];           \/* Device major number as octal string. *\/$/;"	m	struct:ustar_header	file:
 devminor	src/lib/ustar.c	/^    char devminor[8];           \/* Device minor number as octal string. *\/$/;"	m	struct:ustar_header	file:
 diff	src/tests/Algorithm/Diff.pm	/^sub diff$/;"	s
 digits	src/lib/stdio.c	/^    const char *digits;         \/* Collection of digits. *\/$/;"	m	struct:integer_base	file:
 dir	src/filesys/directory.c	/^struct dir $/;"	s	file:
+dir	src/filesys/plan_subdir.c	/^  Changes the current working directory of the process to dir, which may be relative or absolute. Returns true if successful, false on failure.$/;"	v
+dir	src/filesys/plan_subdir.c	/^  Creates the directory named dir, which may be relative or absolute. Returns true if successful, false on failure. Fails if dir already exists or if any directory name in dir, besides the last, does not already exist. That is, mkdir("\/a\/b\/c") succeeds only if \/a\/b already exists and \/a\/b\/c does not.$/;"	v
 dir_add	src/filesys/directory.c	/^dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)$/;"	f
 dir_close	src/filesys/directory.c	/^dir_close (struct dir *dir) $/;"	f
 dir_create	src/filesys/directory.c	/^dir_create (block_sector_t sector, size_t entry_cnt)$/;"	f
@@ -849,8 +900,14 @@ dir_open_root	src/filesys/directory.c	/^dir_open_root (void)$/;"	f
 dir_readdir	src/filesys/directory.c	/^dir_readdir (struct dir *dir, char name[NAME_MAX + 1])$/;"	f
 dir_remove	src/filesys/directory.c	/^dir_remove (struct dir *dir, const char *name) $/;"	f
 dir_reopen	src/filesys/directory.c	/^dir_reopen (struct dir *dir) $/;"	f
+directory	src/filesys/plan_subdir.c	/^  Returns true if fd represents a directory, false if it represents an ordinary file.$/;"	v
+dirty	src/filesys/cache.h	/^    bool dirty;$/;"	m	struct:buffer_cache
+dirty	src/filesys/plan_buffer.c	/^Write dirty blocks to disk whenever they are evicted. Because write-behind makes your file system more fragile in the face of crashes, in addition you should periodically write all dirty, cached blocks back to disk. $/;"	v
+dirty	src/filesys/plan_buffer.c	/^You must implement a cache replacement algorithm that is at least as good as the "clock" algorithm. We encourage you to account for the generally greater value of metadata compared to data. Experiment to see what combination of accessed, dirty, and other information results in the best performance, as measured by the number of disk accesses.$/;"	v
 disk_geometry	src/utils/pintos	/^sub disk_geometry {$/;"	s
 div_round_up	src/utils/Pintos.pm	/^sub div_round_up {$/;"	s
+div_xn	src/threads/fixed-point.c	/^fixed_p div_xn(fixed_p x, int n){$/;"	f
+div_xy	src/threads/fixed-point.c	/^fixed_p div_xy(fixed_p x, fixed_p y){$/;"	f
 divl	src/lib/arithmetic.c	/^divl (uint64_t n, uint32_t d)$/;"	f	file:
 do_compare	src/lib/stdlib.c	/^do_compare (unsigned char *array, size_t a_idx, size_t b_idx, size_t size,$/;"	f	file:
 do_format	src/filesys/filesys.c	/^do_format (void)$/;"	f	file:
@@ -860,6 +917,7 @@ do_set_part	src/utils/Pintos.pm	/^sub do_set_part {$/;"	s
 do_swap	src/lib/stdlib.c	/^do_swap (unsigned char *array, size_t a_idx, size_t b_idx, size_t size)$/;"	f	file:
 do_touch	src/tests/filesys/extended/mk-tree.c	/^do_touch (const char *format, ...)$/;"	f	file:
 do_write	src/tests/filesys/extended/tar.c	/^do_write (int fd, const char *buffer, int size, bool *write_error) $/;"	f	file:
+documentation	src/filesys/plan_extensible.c	/^You are welcome to choose a different scheme as long as you explain the rationale for it in your design documentation, and as long as it does not suffer from external fragmentation (as does the extent-based file system we provide).$/;"	v
 donor_thread_func	src/tests/threads/priority-donate-chain.c	/^donor_thread_func (void *locks_) $/;"	f	file:
 donor_thread_func	src/tests/threads/priority-donate-chain.c	/^static thread_func donor_thread_func;$/;"	v	file:
 ds	src/threads/interrupt.h	/^    uint16_t ds, :16;           \/* Saved DS segment register. *\/$/;"	m	struct:intr_frame
@@ -934,6 +992,9 @@ exit	src/lib/user/syscall.c	/^exit (int status)$/;"	f
 expand	src/examples/insult.c	/^expand (int num, char **grammar[], char *location[], int handle)$/;"	f
 expecting_interrupt	src/devices/ide.c	/^    bool expecting_interrupt;   \/* True if an interrupt is expected, false if$/;"	m	struct:channel	file:
 extend_file	src/utils/pintos	/^sub extend_file {$/;"	s
+f2n_near	src/threads/fixed-point.c	/^int f2n_near ( fixed_p x){$/;"	f
+f2n_t0	src/threads/fixed-point.c	/^int f2n_t0 ( fixed_p x){$/;"	f
+facility	src/filesys/plan_buffer.c	/^If you have timer_sleep() from the first project working, write-behind is an excellent application. Otherwise, you may implement a less general facility, but make sure that it does not exhibit busy-waiting.$/;"	v
 fail	src/tests/lib.c	/^fail (const char *format, ...) $/;"	f
 fail	src/tests/tests.pm	/^sub fail {$/;"	s
 fail	src/tests/threads/tests.c	/^fail (const char *format, ...) $/;"	f
@@ -943,8 +1004,14 @@ failure_cnt	src/tests/internal/stdio.c	/^static int failure_cnt;$/;"	v	file:
 false	src/lib/stdbool.h	6;"	d
 false	src/userprog/syscall.h	13;"	d
 fb	src/devices/vga.c	/^static uint8_t (*fb)[COL_CNT][2];$/;"	v	file:
+fd	src/filesys/plan_subdir.c	/^  Reads a directory entry from file descriptor fd, which must represent a directory. If successful, stores the null-terminated file name in name, which must have room for READDIR_MAX_LEN + 1 bytes, and returns true. If no entries are left in the directory, returns false.$/;"	v
+fd	src/filesys/plan_subdir.c	/^  Returns the inode number of the inode associated with fd, which may represent an ordinary file or a directory.$/;"	v
 fd	src/threads/thread.h	/^  int fd;$/;"	m	struct:file_des
 file	src/filesys/file.c	/^struct file $/;"	s	file:
+file	src/filesys/plan_buffer.c	/^You should also implement read-ahead, that is, automatically fetch the next block of a file into the cache when one block of a file is read, in case that block is about to be read. Read-ahead is only really useful when done asynchronously. That means, if a process requests disk block 1 from the file, it should block until disk block 1 is read in, but once that read is complete, control should return to the process immediately. The read-ahead request for disk block 2 should be handled asynchronously, in the background.$/;"	v
+file	src/filesys/plan_extensible.c	/^There should be no predetermined limit on the size of a file, except that a file cannot exceed the size of the file system (minus metadata). This also applies to the root directory file, which should now be allowed to expand beyond its initial limit of 16 files.$/;"	v
+file	src/filesys/plan_extensible.c	/^User programs are allowed to seek beyond the current end-of-file (EOF). The seek itself does not extend the file. Writing at a position past EOF extends the file to the position being written, and any gap between the previous EOF and the start of the write must be filled with zeros. A read starting from a position past EOF returns no bytes.$/;"	f
+file	src/filesys/plan_synch.c	/^  Similarly, when two processes simultaneously write to the same part of a file, their data may be interleaved.$/;"	v
 file	src/threads/thread.h	/^  struct file * file;$/;"	m	struct:file_des	typeref:struct:file_des::file
 file_allow_write	src/filesys/file.c	/^file_allow_write (struct file *file) $/;"	f
 file_close	src/filesys/file.c	/^file_close (struct file *file) $/;"	f
@@ -966,6 +1033,8 @@ file_tell	src/filesys/file.c	/^file_tell (struct file *file) $/;"	f
 file_write	src/filesys/file.c	/^file_write (struct file *file, const void *buffer, off_t size) $/;"	f
 file_write_at	src/filesys/file.c	/^file_write_at (struct file *file, const void *buffer, off_t size,$/;"	f
 filesize	src/lib/user/syscall.c	/^filesize (int fd) $/;"	f
+filesys_SRC	src/filesys/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Filesystem core.$/;"	m
+filesys_SRC	src/threads/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Filesystem core.$/;"	m
 filesys_SRC	src/userprog/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Filesystem core.$/;"	m
 filesys_bdev_name	src/threads/init.c	/^static const char *filesys_bdev_name;$/;"	v	file:
 filesys_create	src/filesys/filesys.c	/^filesys_create (const char *name, off_t initial_size) $/;"	f
@@ -984,6 +1053,8 @@ finish	src/tests/tests.pm	/^sub finish {$/;"	s
 finish_scratch_disk	src/utils/pintos	/^sub finish_scratch_disk {$/;"	s
 first	src/tests/threads/priority-donate-chain.c	/^    struct lock *first;$/;"	m	struct:lock_pair	typeref:struct:lock_pair::lock	file:
 first_scancode	src/devices/kbd.c	/^    uint8_t first_scancode;     \/* First scancode. *\/$/;"	m	struct:keymap	file:
+fixed_convert	src/threads/fixed-point.c	/^fixed_p fixed_convert = 16384;$/;"	v
+fixed_p	src/threads/fixed-point.h	/^typedef int fixed_p;$/;"	t
 flags	src/lib/stdio.c	/^    flags;$/;"	m	struct:printf_conversion	typeref:enum:printf_conversion::__anon2	file:
 flatten_hierarchy	src/tests/tests.pm	/^sub flatten_hierarchy {$/;"	s
 flush	src/lib/user/console.c	/^flush (struct vhprintf_aux *aux)$/;"	f	file:
@@ -993,6 +1064,7 @@ format_filesys	src/threads/init.c	/^static bool format_filesys;$/;"	v	file:
 format_integer	src/lib/stdio.c	/^format_integer (uintmax_t value, bool is_signed, bool negative, $/;"	f	file:
 format_string	src/lib/stdio.c	/^format_string (const char *string, int length,$/;"	f	file:
 found_partition	src/devices/partition.c	/^found_partition (struct block *block, uint8_t part_type,$/;"	f	file:
+fragmentation	src/filesys/plan_extensible.c	/^The basic file system allocates files as a single extent, making it vulnerable to external fragmentation, that is, it is possible that an n-block file cannot be allocated even though n blocks are free. Eliminate this problem by modifying the on-disk inode structure. $/;"	v
 frame_pointer	src/threads/interrupt.h	/^    void *frame_pointer;        \/* Saved EBP (frame pointer). *\/$/;"	m	struct:intr_frame
 free	src/threads/malloc.c	/^free (void *p) $/;"	f
 free_cnt	src/threads/malloc.c	/^    size_t free_cnt;            \/* Free blocks; pages in big block. *\/$/;"	m	struct:arena	file:
@@ -1008,6 +1080,7 @@ free_map_open	src/filesys/free-map.c	/^free_map_open (void) $/;"	f
 free_map_release	src/filesys/free-map.c	/^free_map_release (block_sector_t sector, size_t cnt)$/;"	f
 fs	src/threads/interrupt.h	/^    uint16_t fs, :16;           \/* Saved FS segment register. *\/$/;"	m	struct:intr_frame
 fs	src/userprog/tss.c	/^    uint16_t fs, :16;$/;"	m	struct:tss	file:
+fs_device	src/filesys/cache.c	/^struct block *fs_device;$/;"	v	typeref:struct:block
 fs_device	src/filesys/filesys.c	/^struct block *fs_device;$/;"	v	typeref:struct:block
 fs_device	src/filesys/filesys.h	/^struct block *fs_device;$/;"	v	typeref:struct:block
 fsutil_append	src/filesys/fsutil.c	/^fsutil_append (char **argv)$/;"	f
@@ -1098,11 +1171,14 @@ idle_thread	src/threads/thread_bak.c	/^static struct thread *idle_thread;$/;"	v	
 idle_ticks	src/threads/thread.c	/^static long long idle_ticks;    \/* # of timer ticks spent idle. *\/$/;"	v	file:
 idle_ticks	src/threads/thread_bak.c	/^static long long idle_ticks;    \/* # of timer ticks spent idle. *\/$/;"	v	file:
 idt	src/threads/interrupt.c	/^static uint64_t idt[INTR_CNT];$/;"	v	file:
+in	src/filesys/plan_buffer.c	/^You should also implement read-ahead, that is, automatically fetch the next block of a file into the cache when one block of a file is read, in case that block is about to be read. Read-ahead is only really useful when done asynchronously. That means, if a process requests disk block 1 from the file, it should block until disk block 1 is read in, but once that read is complete, control should return to the process immediately. The read-ahead request for disk block 2 should be handled asynchronously, in the background.$/;"	v
 in_external_intr	src/threads/interrupt.c	/^static bool in_external_intr;   \/* Are we processing an external interrupt? *\/$/;"	v	file:
 in_something	src/examples/insult.c	/^char *in_something[] =$/;"	v
 in_somethingLoc	src/examples/insult.c	/^char in_somethingLoc[] = { 8, 0, 1, 3, 4, 5, 6, 8, 9, 10 };$/;"	v
 in_use	src/filesys/directory.c	/^    bool in_use;                        \/* In use or free? *\/$/;"	m	struct:dir_entry	file:
 inb	src/threads/io.h	/^inb (uint16_t port)$/;"	f
+independent	src/filesys/plan_subdir.c	/^When one process starts another with the exec system call, the child process inherits its parent's current directory. After that, the two processes' current directories are independent, so that either changing its own current directory has no effect on the other. (This is why, under Unix, the cd command is a shell built-in, not an external program.)$/;"	v
+independent	src/filesys/plan_synch.c	/^Your submission must adopt a finer-grained synchronization strategy that does not require external synchronization. To the extent possible, operations on independent entities should be independent, so that they do not need to wait on each other.$/;"	v
 init	src/devices/vga.c	/^init (void)$/;"	f	file:
 init	src/tests/vm/page-merge-seq.c	/^init (void) $/;"	f	file:
 init	src/tests/vm/parallel-merge.c	/^init (void) $/;"	f	file:
@@ -1189,6 +1265,10 @@ invalidate_pagedir	src/userprog/pagedir.c	/^invalidate_pagedir (uint32_t *pd) $/
 invariant_keymap	src/devices/kbd.c	/^static const struct keymap invariant_keymap[] = $/;"	v	typeref:struct:keymap	file:
 inw	src/threads/io.h	/^inw (uint16_t port)$/;"	f
 irq	src/devices/ide.c	/^    uint8_t irq;                \/* Interrupt in use. *\/$/;"	m	struct:channel	file:
+is	src/filesys/plan_buffer.c	/^You should also implement read-ahead, that is, automatically fetch the next block of a file into the cache when one block of a file is read, in case that block is about to be read. Read-ahead is only really useful when done asynchronously. That means, if a process requests disk block 1 from the file, it should block until disk block 1 is read in, but once that read is complete, control should return to the process immediately. The read-ahead request for disk block 2 should be handled asynchronously, in the background.$/;"	v
+is	src/filesys/plan_buffer.c	/^Your cache should be write-behind, that is, keep dirty blocks in the cache, instead of immediately writing modified data to disk. $/;"	v
+is	src/filesys/plan_extensible.c	/^The basic file system allocates files as a single extent, making it vulnerable to external fragmentation, that is, it is possible that an n-block file cannot be allocated even though n blocks are free. Eliminate this problem by modifying the on-disk inode structure. $/;"	v
+is	src/filesys/plan_synch.c	/^The provided file system requires external synchronization, that is, callers must ensure that only one thread can be running in the file system code at once.$/;"	v
 is_all_zeros	src/lib/ustar.c	/^is_all_zeros (const char *block, size_t cnt)$/;"	f	file:
 is_ata	src/devices/ide.c	/^    bool is_ata;                \/* Is device an ATA disk? *\/$/;"	m	struct:ata_disk	file:
 is_dir	src/tests/tests.pm	/^sub is_dir {$/;"	s
@@ -1218,6 +1298,7 @@ isspace	src/lib/ctype.h	/^static inline int isspace (int c) {$/;"	f
 issue_pio_command	src/devices/ide.c	/^issue_pio_command (struct channel *c, uint8_t command) $/;"	f	file:
 isupper	src/lib/ctype.h	/^static inline int isupper (int c) { return c >= 'A' && c <= 'Z'; }$/;"	f
 isxdigit	src/lib/ctype.h	/^static inline int isxdigit (int c) {$/;"	f
+it	src/filesys/plan_subdir.c	/^The basic file system has a 14-character limit on file names. You may retain this limit for individual file name components, or may extend it, at your option. You must allow full path names to be much longer than 14 characters.$/;"	v
 iterations	src/tests/threads/alarm-simultaneous.c	/^    int iterations;             \/* Number of iterations per thread. *\/$/;"	m	struct:sleep_test	file:
 iterations	src/tests/threads/alarm-wait.c	/^    int iterations;             \/* Iterations counted so far. *\/$/;"	m	struct:sleep_thread	file:
 iterations	src/tests/threads/alarm-wait.c	/^    int iterations;             \/* Number of iterations per thread. *\/$/;"	m	struct:sleep_test	file:
@@ -1225,6 +1306,8 @@ iterations	src/tests/threads/priority-fifo.c	/^    int iterations;             \
 j	src/tests/arc4.h	/^    uint8_t i, j;$/;"	m	struct:arc4
 kbd_init	src/devices/kbd.c	/^kbd_init (void) $/;"	f
 kbd_print_stats	src/devices/kbd.c	/^kbd_print_stats (void) $/;"	f
+kernel_SRC	src/filesys/build/Makefile	/^lib\/kernel_SRC  = lib\/kernel\/debug.c	# Debug helpers.$/;"	m
+kernel_SRC	src/threads/build/Makefile	/^lib\/kernel_SRC  = lib\/kernel\/debug.c	# Debug helpers.$/;"	m
 kernel_SRC	src/userprog/build/Makefile	/^lib\/kernel_SRC  = lib\/kernel\/debug.c	# Debug helpers.$/;"	m
 kernel_pool	src/threads/palloc.c	/^static struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:pool	file:
 kernel_thread	src/threads/thread.c	/^kernel_thread (thread_func *function, void *aux) $/;"	f	file:
@@ -1240,6 +1323,7 @@ keymap	src/devices/kbd.c	/^struct keymap$/;"	s	file:
 kill	src/userprog/exception.c	/^kill (struct intr_frame *f) $/;"	f	file:
 l_thread_func	src/tests/threads/priority-donate-sema.c	/^l_thread_func (void *ls_) $/;"	f	file:
 l_thread_func	src/tests/threads/priority-donate-sema.c	/^static thread_func l_thread_func;$/;"	v	file:
+last	src/filesys/plan_subdir.c	/^  Creates the directory named dir, which may be relative or absolute. Returns true if successful, false on failure. Fails if dir already exists or if any directory name in dir, besides the last, does not already exist. That is, mkdir("\/a\/b\/c") succeeds only if \/a\/b already exists and \/a\/b\/c does not.$/;"	v
 last_mask	src/lib/kernel/bitmap.c	/^last_mask (const struct bitmap *b) $/;"	f	file:
 lba_to_chs	src/utils/Pintos.pm	/^sub lba_to_chs {$/;"	s
 ldt	src/userprog/tss.c	/^    uint16_t ldt, :16;$/;"	m	struct:tss	file:
@@ -1249,6 +1333,8 @@ left_shift	src/devices/kbd.c	/^static bool left_shift, right_shift;    \/* Left 
 length	src/filesys/inode.c	/^    off_t length;                       \/* File size in bytes. *\/$/;"	m	struct:inode_disk	file:
 length	src/lib/stdio.c	/^    int length;         \/* Length of output string. *\/$/;"	m	struct:vsnprintf_aux	file:
 less	src/lib/kernel/hash.h	/^    hash_less_func *less;       \/* Comparison function. *\/$/;"	m	struct:hash
+lib_SRC	src/filesys/build/Makefile	/^lib_SRC  = lib\/debug.c			# Debug helpers.$/;"	m
+lib_SRC	src/threads/build/Makefile	/^lib_SRC  = lib\/debug.c			# Debug helpers.$/;"	m
 lib_SRC	src/userprog/build/Makefile	/^lib_SRC  = lib\/debug.c			# Debug helpers.$/;"	m
 lineup_SRC	src/examples/Makefile	/^lineup_SRC = lineup.c$/;"	m
 linkname	src/lib/ustar.c	/^    char linkname[100];         \/* Name of link target.$/;"	m	struct:ustar_header	file:
@@ -1414,8 +1500,11 @@ move_cursor	src/devices/vga.c	/^move_cursor (void) $/;"	f	file:
 msg	src/tests/lib.c	/^msg (const char *format, ...) $/;"	f
 msg	src/tests/threads/tests.c	/^msg (const char *format, ...) $/;"	f
 mtime	src/lib/ustar.c	/^    char mtime[12];             \/* Modification time in seconds$/;"	m	struct:ustar_header	file:
+mul_xn	src/threads/fixed-point.c	/^fixed_p mul_xn(fixed_p x, int n){$/;"	f
+mul_xy	src/threads/fixed-point.c	/^fixed_p mul_xy(fixed_p x, fixed_p y){$/;"	f
 munmap	src/lib/user/syscall.c	/^munmap (mapid_t mapid)$/;"	f
 myinfo	src/threads/thread.h	/^    struct child_info * myinfo;$/;"	m	struct:thread	typeref:struct:thread::child_info
+n2f	src/threads/fixed-point.c	/^fixed_p n2f (int n){$/;"	f
 name	src/devices/block.c	/^    char name[16];                      \/* Block device name. *\/$/;"	m	struct:block	file:
 name	src/devices/ide.c	/^    char name[8];               \/* Name, e.g. "hda". *\/$/;"	m	struct:ata_disk	file:
 name	src/devices/ide.c	/^    char name[8];               \/* Name, e.g. "ide0". *\/$/;"	m	struct:channel	file:
@@ -1449,9 +1538,11 @@ noun_and_prep	src/examples/insult.c	/^char *noun_and_prep[] =$/;"	v
 noun_and_prepLoc	src/examples/insult.c	/^char noun_and_prepLoc[] =$/;"	v
 numbers	src/examples/insult.c	/^char *numbers[] =$/;"	v
 numbersLoc	src/examples/insult.c	/^char numbersLoc[] = { 7, 0, 2, 4, 5, 7, 8, 10, 13 };$/;"	v
+o	src/filesys/plan_buffer.c	/^Modify the file system to keep a cache of file blocks. When a request is made to read or write a block, check to see if it is in the cache, and if so, use the cached data without going to disk. $/;"	v
 off_t	src/filesys/off_t.h	/^typedef int32_t off_t;$/;"	t
 offsetof	src/lib/stddef.h	5;"	d
 on_wait	src/threads/thread.h	/^    bool on_wait;$/;"	m	struct:thread
+once	src/filesys/plan_subdir.c	/^  If the directory changes while it is open, then it is acceptable for some entries not to be read at all or to be read multiple times. Otherwise, each directory entry should be read once, in any order.$/;"	v
 op	src/tests/threads/priority-fifo.c	/^    int **op;                   \/* Output buffer position. *\/$/;"	m	struct:simple_thread_data	file:
 open	src/lib/user/syscall.c	/^open (const char *file)$/;"	f
 open_cnt	src/filesys/inode.c	/^    int open_cnt;                       \/* Number of openers. *\/$/;"	m	struct:inode	file:
@@ -1511,6 +1602,7 @@ parse_command_line	src/utils/pintos	/^sub parse_command_line {$/;"	s
 parse_conversion	src/lib/stdio.c	/^parse_conversion (const char *format, struct printf_conversion *c,$/;"	f	file:
 parse_octal_field	src/lib/ustar.c	/^parse_octal_field (const char *s, size_t size, unsigned long int *value)$/;"	f	file:
 parse_options	src/threads/init.c	/^parse_options (char **argv) $/;"	f	file:
+part	src/filesys/plan_synch.c	/^Suppose processes A and B both have a given file open and both are positioned at end-of-file. If A reads and B writes the file at the same time, A may read all, part, or none of what B writes. $/;"	v
 partition	src/devices/partition.c	/^struct partition$/;"	s	file:
 partition	src/tests/vm/qsort.c	/^partition (unsigned char *array, size_t size, int pivot) $/;"	f	file:
 partition_operations	src/devices/partition.c	/^static struct block_operations partition_operations =$/;"	v	typeref:struct:block_operations	file:
@@ -1524,6 +1616,7 @@ pass	src/tests/threads/tests.c	/^pass (void) $/;"	f
 pd_no	src/threads/pte.h	/^static inline uintptr_t pd_no (const void *va) {$/;"	f
 pde_create	src/threads/pte.h	/^static inline uint32_t pde_create (uint32_t *pt) {$/;"	f
 pde_get_pt	src/threads/pte.h	/^static inline uint32_t *pde_get_pt (uint32_t pde) {$/;"	f
+performance	src/filesys/plan_buffer.c	/^You must implement a cache replacement algorithm that is at least as good as the "clock" algorithm. We encourage you to account for the generally greater value of metadata compared to data. Experiment to see what combination of accessed, dirty, and other information results in the best performance, as measured by the number of disk accesses.$/;"	v
 pg_no	src/threads/vaddr.h	/^static inline uintptr_t pg_no (const void *va) {$/;"	f
 pg_ofs	src/threads/vaddr.h	/^static inline unsigned pg_ofs (const void *va) {$/;"	f
 pg_round_down	src/threads/vaddr.h	/^static inline void *pg_round_down (const void *va) {$/;"	f
@@ -1593,6 +1686,7 @@ random_init	src/tests/random.pm	/^sub random_init {$/;"	s
 random_ulong	src/lib/random.c	/^random_ulong (void) $/;"	f
 random_ulong	src/tests/random.pm	/^sub random_ulong {$/;"	s
 read	src/devices/block.h	/^    void (*read) (void *aux, block_sector_t, void *buffer);$/;"	m	struct:block_operations
+read	src/filesys/plan_buffer.c	/^You should also implement read-ahead, that is, automatically fetch the next block of a file into the cache when one block of a file is read, in case that block is about to be read. Read-ahead is only really useful when done asynchronously. That means, if a process requests disk block 1 from the file, it should block until disk block 1 is read in, but once that read is complete, control should return to the process immediately. The read-ahead request for disk block 2 should be handled asynchronously, in the background.$/;"	v
 read	src/lib/user/syscall.c	/^read (int fd, void *buffer, unsigned size)$/;"	f
 read_cnt	src/devices/block.c	/^    unsigned long long read_cnt;        \/* Number of sectors read. *\/$/;"	m	struct:block	file:
 read_command_line	src/threads/init.c	/^read_command_line (void) $/;"	f	file:
@@ -1671,6 +1765,8 @@ sdiv64	src/lib/arithmetic.c	/^sdiv64 (int64_t n, int64_t d)$/;"	f	file:
 search_path	src/utils/backtrace	/^sub search_path {$/;"	s
 second	src/tests/threads/priority-donate-chain.c	/^    struct lock *second;$/;"	m	struct:lock_pair	typeref:struct:lock_pair::lock	file:
 sector	src/filesys/inode.c	/^    block_sector_t sector;              \/* Sector number of disk location. *\/$/;"	m	struct:inode	file:
+sector	src/filesys/plan_extensible.c	/^You can assume that the file system partition will not be larger than 8 MB. You must support files as large as the partition (minus metadata). Each inode is stored in one disk sector, limiting the number of block pointers that it can contain. Supporting 8 MB files will require you to implement doubly-indirect blocks.$/;"	v
+sector_idx	src/filesys/cache.h	/^    block_sector_t sector_idx;$/;"	m	struct:buffer_cache
 seek	src/lib/user/syscall.c	/^seek (int fd, unsigned position) $/;"	f
 seg_class	src/userprog/gdt.c	/^enum seg_class$/;"	g	file:
 seg_granularity	src/userprog/gdt.c	/^enum seg_granularity$/;"	g	file:
@@ -1698,6 +1794,8 @@ serial_notify	src/devices/serial.c	/^serial_notify (void) $/;"	f
 serial_putc	src/devices/serial.c	/^serial_putc (uint8_t byte) $/;"	f
 set_align	src/utils/Pintos.pm	/^sub set_align {$/;"	s
 set_as	src/utils/pintos	/^sub set_as {$/;"	s
+set_buffer_accessed	src/filesys/cache.c	/^void set_buffer_accessed (struct buffer_cache * cache, bool accessed)$/;"	f
+set_buffer_dirty	src/filesys/cache.c	/^void set_buffer_dirty (struct buffer_cache * cache, bool dirty)$/;"	f
 set_debug	src/utils/pintos	/^sub set_debug {$/;"	s
 set_disk	src/utils/pintos	/^sub set_disk {$/;"	s
 set_geometry	src/utils/Pintos.pm	/^sub set_geometry {$/;"	s
@@ -1732,6 +1830,7 @@ simple_thread_func	src/tests/threads/priority-preempt.c	/^static thread_func sim
 size	src/devices/block.c	/^    block_sector_t size;                 \/* Size in sectors. *\/$/;"	m	struct:block	file:
 size	src/lib/ustar.c	/^    char size[12];              \/* File size in bytes as octal string. *\/$/;"	m	struct:ustar_header	file:
 size_t	src/lib/stddef.h	/^typedef __SIZE_TYPE__ size_t;$/;"	t
+sleep_list	src/devices/timer.c	/^static struct list sleep_list;$/;"	v	typeref:struct:list	file:
 sleep_test	src/tests/threads/alarm-simultaneous.c	/^struct sleep_test $/;"	s	file:
 sleep_test	src/tests/threads/alarm-wait.c	/^struct sleep_test $/;"	s	file:
 sleep_thread	src/tests/threads/alarm-wait.c	/^struct sleep_thread $/;"	s	file:
@@ -1787,6 +1886,8 @@ strtok	src/lib/string.h	33;"	d
 strtok_r	src/lib/string.c	/^strtok_r (char *s, const char *delimiters, char **save_ptr) $/;"	f
 stuff	src/examples/insult.c	/^char *stuff[] =$/;"	v
 stuffLoc	src/examples/insult.c	/^char stuffLoc[] = { 14, 0, 1, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14, 15, 17, 18 };$/;"	v
+sub_xn	src/threads/fixed-point.c	/^fixed_p sub_xn(fixed_p x, int n){$/;"	f
+sub_xy	src/threads/fixed-point.c	/^fixed_p sub_xy(fixed_p x, fixed_p y){$/;"	f
 swap	src/lib/kernel/list.c	/^swap (struct list_elem **a, struct list_elem **b) $/;"	f	file:
 swap	src/tests/lib.c	/^swap (void *a_, void *b_, size_t size) $/;"	f	file:
 swap	src/tests/vm/qsort.c	/^swap (unsigned char *a, unsigned char *b) $/;"	f	file:
@@ -1980,6 +2081,7 @@ test_priority_sema	src/tests/threads/priority-sema.c	/^test_priority_sema (void)
 test_sleep	src/tests/threads/alarm-simultaneous.c	/^test_sleep (int thread_cnt, int iterations) $/;"	f	file:
 test_sleep	src/tests/threads/alarm-wait.c	/^test_sleep (int thread_cnt, int iterations) $/;"	f	file:
 tests	src/tests/threads/tests.c	/^static const struct test tests[] = $/;"	v	typeref:struct:test	file:
+that	src/filesys/plan_subdir.c	/^Update the existing system calls so that, anywhere a file name is provided by the caller, an absolute or relative path name may used. The directory separator character is forward slash (\/). You must also support special file names . and .., which have the same meanings as they do in Unix.$/;"	v
 thread	src/threads/thread.h	/^struct thread$/;"	s
 thread_action_func	src/threads/thread.h	/^typedef void thread_action_func (struct thread *t, void *aux);$/;"	t
 thread_block	src/threads/thread.c	/^thread_block (void) $/;"	f
@@ -2031,6 +2133,8 @@ thread_unblock	src/threads/thread.c	/^thread_unblock (struct thread *t) $/;"	f
 thread_unblock	src/threads/thread_bak.c	/^thread_unblock (struct thread *t) $/;"	f
 thread_yield	src/threads/thread.c	/^thread_yield (void) $/;"	f
 thread_yield	src/threads/thread_bak.c	/^thread_yield (void) $/;"	f
+threads_SRC	src/filesys/build/Makefile	/^threads_SRC  = threads\/start.S		# Startup code.$/;"	m
+threads_SRC	src/threads/build/Makefile	/^threads_SRC  = threads\/start.S		# Startup code.$/;"	m
 threads_SRC	src/userprog/build/Makefile	/^threads_SRC  = threads\/start.S		# Startup code.$/;"	m
 tick_count	src/tests/threads/mlfqs-fair.c	/^    int tick_count;$/;"	m	struct:thread_info	file:
 ticks	src/devices/timer.c	/^static int64_t ticks;$/;"	v	file:
@@ -2044,6 +2148,7 @@ time_t	src/devices/rtc.h	/^typedef unsigned long time_t;$/;"	t
 timeout	src/utils/pintos	/^sub timeout {$/;"	s
 timer_calibrate	src/devices/timer.c	/^timer_calibrate (void) $/;"	f
 timer_elapsed	src/devices/timer.c	/^timer_elapsed (int64_t then) $/;"	f
+timer_elem	src/threads/thread.h	/^    struct list_elem timer_elem;$/;"	m	struct:thread	typeref:struct:thread::list_elem
 timer_init	src/devices/timer.c	/^timer_init (void) $/;"	f
 timer_interrupt	src/devices/timer.c	/^static intr_handler_func timer_interrupt;$/;"	v	file:
 timer_interrupt	src/devices/timer.c	/^timer_interrupt (struct intr_frame *args UNUSED)$/;"	f	file:
@@ -2052,10 +2157,11 @@ timer_msleep	src/devices/timer.c	/^timer_msleep (int64_t ms) $/;"	f
 timer_ndelay	src/devices/timer.c	/^timer_ndelay (int64_t ns) $/;"	f
 timer_nsleep	src/devices/timer.c	/^timer_nsleep (int64_t ns) $/;"	f
 timer_print_stats	src/devices/timer.c	/^timer_print_stats (void) $/;"	f
-timer_sleep	src/devices/timer.c	/^timer_sleep (int64_t ticks) $/;"	f
+timer_sleep	src/devices/timer.c	/^timer_sleep (int64_t tick) $/;"	f
 timer_ticks	src/devices/timer.c	/^timer_ticks (void) $/;"	f
 timer_udelay	src/devices/timer.c	/^timer_udelay (int64_t us) $/;"	f
 timer_usleep	src/devices/timer.c	/^timer_usleep (int64_t us) $/;"	f
+timer_wakeup	src/devices/timer.c	/^timer_wakeup (void)$/;"	f
 tolower	src/lib/ctype.h	/^static inline int tolower (int c) { return isupper (c) ? c - 'A' + 'a' : c; }$/;"	f
 too_many_loops	src/devices/timer.c	/^too_many_loops (unsigned loops) $/;"	f	file:
 toupper	src/lib/ctype.h	/^static inline int toupper (int c) { return islower (c) ? c - 'a' + 'A' : c; }$/;"	f
@@ -2101,6 +2207,8 @@ user_page_limit	src/threads/init.c	/^static size_t user_page_limit = SIZE_MAX;$/
 user_pool	src/threads/palloc.c	/^static struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:	file:
 user_ticks	src/threads/thread.c	/^static long long user_ticks;    \/* # of timer ticks in user programs. *\/$/;"	v	file:
 user_ticks	src/threads/thread_bak.c	/^static long long user_ticks;    \/* # of timer ticks in user programs. *\/$/;"	v	file:
+userprog_SRC	src/filesys/build/Makefile	/^userprog_SRC  = userprog\/process.c	# Process loading.$/;"	m
+userprog_SRC	src/threads/build/Makefile	/^userprog_SRC  = userprog\/process.c	# Process loading.$/;"	m
 userprog_SRC	src/userprog/build/Makefile	/^userprog_SRC  = userprog\/process.c	# Process loading.$/;"	m
 ustar_header	src/lib/ustar.c	/^struct ustar_header$/;"	s	file:
 ustar_make_header	src/lib/ustar.c	/^ustar_make_header (const char *file_name, enum ustar_type type,$/;"	f
@@ -2111,6 +2219,7 @@ va_copy	src/lib/stdarg.h	12;"	d
 va_end	src/lib/stdarg.h	10;"	d
 va_list	src/lib/stdarg.h	/^typedef __builtin_va_list va_list;$/;"	t
 va_start	src/lib/stdarg.h	9;"	d
+valid	src/filesys/cache.h	/^    bool valid;$/;"	m	struct:buffer_cache
 validate_segment	src/userprog/process.c	/^validate_segment (const struct Elf32_Phdr *phdr, struct file *file) $/;"	f	file:
 value	src/tests/internal/list.c	/^    int value;                  \/* Item value. *\/$/;"	m	struct:value	file:
 value	src/tests/internal/list.c	/^struct value $/;"	s	file:
@@ -2146,7 +2255,9 @@ wait_while_busy	src/devices/ide.c	/^wait_while_busy (const struct ata_disk *d) $
 waiters	src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:condition	typeref:struct:condition::list
 waiters	src/threads/synch.h	/^    struct list waiters;        \/* List of waiting threads. *\/$/;"	m	struct:semaphore	typeref:struct:semaphore::list
 wake_time	src/tests/threads/alarm-priority.c	/^static int64_t wake_time;$/;"	v	file:
+wakeup_ticks	src/threads/thread.h	/^    int64_t wakeup_ticks;$/;"	m	struct:thread
 width	src/lib/stdio.c	/^    int width;$/;"	m	struct:printf_conversion	file:
+working	src/filesys/plan_buffer.c	/^If you have timer_sleep() from the first project working, write-behind is an excellent application. Otherwise, you may implement a less general facility, but make sure that it does not exhibit busy-waiting.$/;"	v
 wrap_open	src/tests/filesys/extended/dir-rm-cwd.c	/^wrap_open (const char *name) $/;"	f	file:
 write	src/devices/block.h	/^    void (*write) (void *aux, block_sector_t, const void *buffer);$/;"	m	struct:block_operations
 write	src/lib/user/syscall.c	/^write (int fd, const void *buffer, unsigned size)$/;"	f
@@ -2157,6 +2268,7 @@ write_header	src/tests/filesys/extended/tar.c	/^write_header (const char *file_n
 write_ier	src/devices/serial.c	/^write_ier (void) $/;"	f	file:
 write_some_bytes	src/tests/filesys/extended/grow-two-files.c	/^write_some_bytes (const char *file_name, int fd, const char *buf, size_t *ofs) $/;"	f	file:
 write_zeros	src/utils/Pintos.pm	/^sub write_zeros {$/;"	s
+writes	src/filesys/plan_synch.c	/^However, A may not read data other than what B writes, e.g. if B's data is all nonzero bytes, A is not allowed to see any zeros.$/;"	v
 x	src/lib/stdio.c	/^    int x;                      \/* `x' character to use, for base 16 only. *\/$/;"	m	struct:integer_base	file:
 x	src/tests/vm/mmap-over-data.c	/^static char x;$/;"	v	file:
 xsystem	src/utils/pintos	/^sub xsystem {$/;"	s

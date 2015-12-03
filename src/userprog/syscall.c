@@ -10,6 +10,7 @@
 #include "userprog/process.h"
 #include "userprog/pagedir.h"
 #include "threads/pte.h"
+#include "filesys/cache.h"
 #include "devices/input.h"
 
 #define ARG1(ESP) ( ( ((void *)ESP + 4)) )
@@ -151,14 +152,15 @@ void sys_exit(int status)
     free(cinfo);
   } 
 
-  for (i=2 ; i < 128; i ++)
+  for (i = 2; i < 128; i ++)
     if(cur->file_des[i] != NULL) {
       sys_close(i);
 
       ASSERT( cur->file_des[i] == NULL );
     }
 
-
+  buffer_write_behind ();
+  
   printf ("%s: exit(%d)\n", thread_name() ,status);
   lock_release(&cur->myinfo->child_lock);
   thread_exit();
