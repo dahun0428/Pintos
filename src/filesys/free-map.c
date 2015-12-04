@@ -83,3 +83,11 @@ free_map_create (void)
   if (!bitmap_write (free_map, free_map_file))
     PANIC ("can't write free map");
 }
+
+
+/* return true if there are CNT free sectors, or false */
+bool
+free_map_check (size_t cnt)
+{
+  return !(cnt < bitmap_count (free_map, 0, bitmap_size (free_map), false));
+}
