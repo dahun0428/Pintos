@@ -125,3 +125,46 @@ void set_buffer_dirty (struct buffer_cache * cache, bool dirty)
   cache->dirty = dirty;
 }
 
+struct buffer_cache * cache_read_at (block_sector_t sector_idx, void *buffer_, off_t sector_ofs, int chunk_size)
+{
+  uint8_t *buffer = buffer_;
+  struct buffer_cache * cache = NULL;
+
+
+  cache = buffer_find_cache (sector_idx);
+  if (cache == NULL)
+  {
+    cache = buffer_get_cache (sector_idx);
+    block_read (fs_device, sector_idx, cache->data);
+    set_buffer_accessed (cache, true);
+  }
+
+  memcpy (buffer, cache->data + sector_ofs, chunk_size);
+
+  return cache;
+}
+
+
+struct buffer_cache * cache_write_at (block_sector_t sector_idx, void *buffer_, off_t sector_ofs, int chunk_size)
+{
+  uint8_t *buffer = buffer_;
+  struct buffer_cache * cache = NULL;
+  int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
+
+  cache = buffer_find_cache (sector_idx);
+  if (cache == NULL)
+  {
+    cache = buffer_get_cache (sector_idx);
+    if (sector_ofs > 0 || chunk_size < sector_left) 
+      block_read (fs_device, sector_idx, cache->data);
+    else
+      memset (cache->data, 0, BLOCK_SECTOR_SIZE);
+  }
+
+  /* If the sector contains data before or after the chunk
+     we're writing, then we need to read in the sector
+     first.  Otherwise we start with a sector of all zeros. */
+  memcpy (cache->data + sector_ofs, buffer, chunk_size);
+  set_buffer_accessed (cache, true);
+  set_buffer_dirty (cache, true);
+}

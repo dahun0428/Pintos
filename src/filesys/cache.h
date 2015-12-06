@@ -31,6 +31,9 @@ void buffer_write_behind (void);
 void set_buffer_accessed (struct buffer_cache *, bool);
 void set_buffer_dirty (struct buffer_cache *, bool);
 
+struct buffer_cache * cache_read_at (block_sector_t, void *, off_t, int);
+struct buffer_cache * cache_write_at (block_sector_t, void *, off_t, int);
+
 #endif /* filesys/cache.h */
 
 

@@ -50,3 +50,13 @@ System Call: bool chdir (const char *dir)
 
   We have provided ls and mkdir user programs, which are straightforward once the above syscalls are implemented. We have also provided pwd, which is not so straightforward. The shell program implements cd internally.
   The pintos extract and append commands should now accept full path names, assuming that the directories used in the paths have already been created. This should not require any significant extra effort on your part.
+
+The function I will implement:
+  const char * rel2abs (const char *) // relative path to absolute path
+  const char * abs2rel (const char *) // absolute path to relative path, may dir name
+  const char * path_parser (const char *) // from given path, find dir name.
+struct thread
+{
+  char * pwd; /* current path. maybe absolute path */
+  /* others... */
+}

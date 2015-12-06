@@ -61,128 +61,33 @@ struct inode
   /* others... */
 }
 
-bool
-inode_create (block_sector_t sector, off_t length)
+off_t
+inode_write_at (struct inode *inode, const void *buffer_, off_t size,
+    off_t offset) 
 {
-  struct inode_disk *disk_inode = NULL;
-  bool success = false;
-
-  ASSERT (length >= 0); 
-
-  /* If this assertion fails, the inode structure is not exactly
-     one sector in size, and you should fix that. */
-  ASSERT (sizeof *disk_inode == BLOCK_SECTOR_SIZE);
-
-  disk_inode = calloc (1, sizeof *disk_inode);
-  if (disk_inode != NULL)
-  {   
-    size_t sectors = bytes_to_sectors (length);
-    disk_inode->length = length;
-    disk_inode->magic = INODE_MAGIC;
-    size_t iter = 0;
-    dbl_indir_array dbl { {0} };
-    size_t check_cnt = sectors + 1 + DIV_ROUND_UP (sectors, 128);
-
-    if (!free_map_check (check_cnt))
-    {
-      free (disk_inode);
-      return success;
-    }
-
-    if (free_map_allocate (1, &disk_inode->dbl_ary)) 
-    {   
-      block_write (fs_device, sector, disk_inode);
-      size_t surplus_cnt = sectors % 128; //#define 128 BLOCK_SECTOR_MAX
-      size_t indir_cnt = DIV_ROUND_UP (sectors, 128);
-
-      if (indir_cnt == 1 && surplus_cnt == 0)
-        surplus_cnt++;
-
-      for (iter = 0; iter < indir_cnt ; iter++)
-      {
-        static char zeros[BLOCK_SECTOR_SIZE];
-        size_t i;
-        struct indir_array indir = { {0} };
-        block_sector_t indir_t;
-
-        free_map_allocate (1, &indir_t);
-        size_t chunk_size = (indir_cnt - iter) > 1 ? 128 : surplus_cnt;
-
-
-        for (i = 0; i < chunk_size; i++) 
-          block_write (fs_device, indir[i], zeros);
-
-        block_write (fs_device, indir_t, &indir);
-        dbl[iter] = indir[i];
-      }   
-      block_write (fs_device, disk_inode->dbl_ary, &dbl);
-      success = true; 
-    }
-    free (disk_inode);
-  }   
-  return success;
-}
-
-
-void
-inode_close (struct inode *inode) 
-{
-  /* Ignore null pointer. */
-  if (inode == NULL)
-    return;
-
-  /* Release resources if this was the last opener. */
-  if (--inode->open_cnt == 0)
-  {
-    /* Remove from inode list and release lock. */
-    list_remove (&inode->elem);
-
-    /* Deallocate blocks if removed. */
-    if (inode->removed) 
-    {
-      size_t sectors = byte_to_sectors(inode->data.length);
-      size_t indir_cnt = DIV_ROUND_UP (sectors, 128), i;
-      struct indir_array indir;
-
-      for (i = 0; i < indir_cnt; i ++)
-      {
-        size_t j;
-        block_read (fs_device, inode->dbl[i], &indir);
-        for (j = 0; j < 128 && sectors > 0; j++)
-        {
-          free_map_release (indir[j], 1);
-          sectors--;
-        }
-        free_map_release (inode->dbl[i], 1);
-      }
-      free_map_release (inode->data.dbl_ary, 1); 
-      free_map_release (inode->sector, 1);
-      free (inode->dbl);
-    }
-
-    free (inode); 
-  }
-  buffer_write_behind ();
-}
-
-  off_t
-inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) 
-{
-  uint8_t *buffer = buffer_;
-  off_t bytes_read = 0;
+  const uint8_t *buffer = buffer_;
+  off_t bytes_written = 0;
   struct buffer_cache * cache = NULL;
+
+  if (inode->deny_write_cnt)
+    return 0;
 
   while (size > 0) 
   {
-    /* Disk sector to read, starting byte offset within sector. */
-    block_sector_t offset_idx = byte_to_sector (inode, offset);
-    block_sector_t dbl_idx = offset_idx / 128;
-    block_sector_t indir_idx = offset_idx % 128;
+    /* Sector to write, starting byte offset within sector. */
+    block_sector_t offset_idx = offset / BLOCK_SECTOR_SIZE; //byte_to_sector (inode, offset);
+    block_sector_t dbl_idx = offset_idx / SECTOR_ARRAY_MAX;
+    block_sector_t indir_idx = offset_idx % SECTOR_ARRAY_MAX;
 
-    struct indir_array indir;
-
+    indir_array indir = {0};
+  
+    //printf("(write) offset: %d\n", offset);
+    //printf("(write) inode_sector: %d\n",inode->sector);
+    //printf("(write) dbl_sector: %d\n",inode->data.dbl_ary);
     block_read (fs_device, inode->dbl[dbl_idx], &indir);
     block_sector_t sector_idx = indir[indir_idx];
+    //printf("(write) indir_idx:  %d\n",indir_idx);
+    //printf("(write) sector_idx: %d\n",sector_idx);
 
     int sector_ofs = offset % BLOCK_SECTOR_SIZE;
 
@@ -191,7 +96,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
     int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
     int min_left = inode_left < sector_left ? inode_left : sector_left;
 
-    /* Number of bytes to actually copy out of this sector. */
+    /* Number of bytes to actually write into this sector. */
     int chunk_size = size < min_left ? size : min_left;
     if (chunk_size <= 0)
       break;
@@ -200,18 +105,28 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
     if (cache == NULL)
     {
       cache = buffer_get_cache (sector_idx);
-      block_read (fs_device, sector_idx, cache->data);
-      set_buffer_accessed (cache, true);
+      if (sector_ofs > 0 || chunk_size < sector_left) 
+        block_read (fs_device, sector_idx, cache->data);
+      else
+        memset (cache->data, 0, BLOCK_SECTOR_SIZE);
+
     }
 
-    memcpy (buffer + bytes_read, cache->data + sector_ofs, chunk_size);
+    /* If the sector contains data before or after the chunk
+       we're writing, then we need to read in the sector
+       first.  Otherwise we start with a sector of all zeros. */
+    memcpy (cache->data + sector_ofs, buffer + bytes_written, chunk_size);
+//    block_write (fs_device, sector_idx, cache->data);
+    set_buffer_accessed (cache, true);
+    set_buffer_dirty (cache, true);
+
 
     /* Advance. */
     size -= chunk_size;
     offset += chunk_size;
-    bytes_read += chunk_size;
+    bytes_written += chunk_size;
   }
 
-  return bytes_read;
+  //printf("(write) bytes_written: %d\n",bytes_written);
+  return bytes_written;
 }
-
