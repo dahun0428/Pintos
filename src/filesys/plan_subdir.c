@@ -31,8 +31,13 @@ You may decide whether to allow deletion of a directory that is open by a proces
 Implement the following new system calls:
 System Call: bool chdir (const char *dir)
   Changes the current working directory of the process to dir, which may be relative or absolute. Returns true if successful, false on failure.
+  "thread will have cur_dir variable"
+
   System Call: bool mkdir (const char *dir)
   Creates the directory named dir, which may be relative or absolute. Returns true if successful, false on failure. Fails if dir already exists or if any directory name in dir, besides the last, does not already exist. That is, mkdir("/a/b/c") succeeds only if /a/b already exists and /a/b/c does not.
+  "I will try"
+  "using filesys_create inside"
+
   System Call: bool readdir (int fd, char *name)
   Reads a directory entry from file descriptor fd, which must represent a directory. If successful, stores the null-terminated file name in name, which must have room for READDIR_MAX_LEN + 1 bytes, and returns true. If no entries are left in the directory, returns false.
   . and .. should not be returned by readdir.
@@ -43,10 +48,12 @@ System Call: bool chdir (const char *dir)
 
   System Call: bool isdir (int fd)
   Returns true if fd represents a directory, false if it represents an ordinary file.
+  "inode and inode_disk will have a boolean value dir"
 
   System Call: int inumber (int fd)
   Returns the inode number of the inode associated with fd, which may represent an ordinary file or a directory.
   An inode number persistently identifies a file or directory. It is unique during the file's existence. In Pintos, the sector number of the inode is suitable for use as an inode number.
+  "will be so easy"
 
   We have provided ls and mkdir user programs, which are straightforward once the above syscalls are implemented. We have also provided pwd, which is not so straightforward. The shell program implements cd internally.
   The pintos extract and append commands should now accept full path names, assuming that the directories used in the paths have already been created. This should not require any significant extra effort on your part.
@@ -55,8 +62,151 @@ The function I will implement:
   const char * rel2abs (const char *) // relative path to absolute path
   const char * abs2rel (const char *) // absolute path to relative path, may dir name
   const char * path_parser (const char *) // from given path, find dir name.
+  bool path_finder (const char *) 
+  or 
+  bool is_absolute_path (const char *)
 struct thread
 {
-  char * pwd; /* current path. maybe absolute path */
+  char * cur_idr; /* current path. maybe absolute path */
   /* others... */
+}
+
+
+/* in inode.c */
+block_sector_t
+inode_inumber (const struct inode *inode)
+{
+  return inode->sector;
+}
+
+/* syscall.c */
+int inumber (int fd)
+{
+  struct thread *t = thread_current ();
+  if (t->file_des[fd] != NULL)
+    return (int) inode_number (file_get_inode (t->file_des[fd]->file));
+}
+
+/* in inode.c */
+bool inode_isdir (const struct inode *inode)
+{
+  return inode->is_dir;
+}
+
+/* syscall.c */
+bool isdir (int fd)
+{
+  struct thread *t = thread_current ();
+  if (t->file_des[fd] != NULL)
+    return (int) inode_isdir (file_get_inode (t->file_des[fd]->file));
+}
+
+/* in thread.c */
+const char * thread_pwd ()
+{
+  return thread_current ()->cur_dir;
+} /* return current directory name */
+
+/* in inode.c */
+void inode_set_dir (struct inode *inode, bool is_dir_)
+{
+  inode->is_dir = is_dir_;
+}
+
+struct dir *
+dir_open ()
+{
+  
+  /* other func */
+  inode_set_dir (inode, true);
+}
+
+bool mkdir (const char *dir)
+{
+
+}
+
+bool is_absolute_path (const char * path)
+{
+  if (*path == '/')
+    return true;
+
+  return false;
+}
+
+/* parsing path, then return struct dir * to path_dir,
+ and file name pointer to file_name */
+void path_parser (const char *path, struct dir **path_dir, char ** file_name)
+{
+  struct thread *t = thread_current ();
+  char *split_path;
+  char *token = NULL, *ptr = NULL;
+  struct dir *dir = dir_open_root ();
+  struct inode *inode = NULL;
+  char *stack_name[100] = {0};
+  int stack_top = -1;
+
+  if (is_abosulte_path (path))
+  {
+    split_path = calloc (1, strlen (path) + 1);
+    if (split_path == NULL)
+      return;
+    strlcpy (split_path, path, strlen(path)); 
+  }
+  
+  else 
+  {
+    split_path = calloc (1, strlen (t->cur_dir) + strlen (path) + 1);
+    if (split_path == NULL)
+      return;
+    strlcpy (split_path, t->cur_dir, strlen (t->cur_dir));
+    strlcat (split_path, path, strlen (path));
+  }
+
+  token = strtok_r (split_path, "/", &ptr);
+
+  /* this first token must not be NULL */
+  ASSERT (token != NULL);
+
+  while (token)
+  {
+    if (!strcmp (token, "."))
+      goto meet_cur;
+    
+    else if (!strcmp (toekn, ".."))
+    {
+      stack_name[stack_top--] = NULL;    // pop
+      if (stack_top < -1)
+        stack_top = -1;
+      goto meet_cur;
+    }
+    
+    stack_name[++stack_top] = token;
+meet_cur:
+     token = strtok_r (NULL, "/", &ptr);
+  }
+
+//  *path_dir = dir;
+  *file_name = calloc (1, strlen (stack_name[stack_top]) + 1); 
+  strlcpy (*file_name, stack_name[stack_top], strlen (stack_name[stack_top]));
+  stack_name[stack_top--] = NULL;
+
+  while (stack_top > -1)
+  {
+    if (!dir_lookup (dir, stack_name[stack_top], &inode))
+    {
+      free (split_path);
+      free (*file_name);
+      *file_name = NULL;
+      *path_dir = NULL;
+      return;
+    }
+    dir_close (dir);
+    dir = dir_open (inode);
+    stack_name[stack_top--] = NULL;
+  }
+  *path_dir = dir;
+  ASSERT (dir != NULL);
+
+  free (split_path);
 }

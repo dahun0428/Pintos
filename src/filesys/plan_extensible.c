@@ -16,6 +16,7 @@ An extent-based file can only grow if it is followed by empty space, but indexed
 
 There should be no predetermined limit on the size of a file, except that a file cannot exceed the size of the file system (minus metadata). This also applies to the root directory file, which should now be allowed to expand beyond its initial limit of 16 files.
 "does limit means the number of files..? or file size..?"
+"I don't know whether i solved this problem or not"
 
 User programs are allowed to seek beyond the current end-of-file (EOF). The seek itself does not extend the file. Writing at a position past EOF extends the file to the position being written, and any gap between the previous EOF and the start of the write must be filled with zeros. A read starting from a position past EOF returns no bytes.
 "got it"

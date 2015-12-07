@@ -20,7 +20,8 @@ struct inode_disk
     block_sector_t dbl_ary;               /* First data sector. */
     off_t length;                       /* File size in bytes. */
     unsigned magic;                     /* Magic number. */
-    uint32_t unused[125];               /* Not used. */
+    bool is_dir;                        /* true if dir */
+    uint32_t unused[124];               /* Not used. */
   };
 
 /* following two structures are the same, just for convinience */
@@ -48,6 +49,7 @@ struct inode
     int deny_write_cnt;                 /* 0: writes ok, >0: deny writes. */
     struct inode_disk data;             /* Inode content. */
     block_sector_t *dbl;
+    bool is_dir;                        /* true if dir */
   };
 
 /* Returns the block device sector that contains byte offset POS
@@ -99,6 +101,7 @@ inode_create (block_sector_t sector, off_t length)
     size_t sectors = bytes_to_sectors (length);
     disk_inode->length = length;
     disk_inode->magic = INODE_MAGIC;
+    disk_inode->is_dir = false;
     size_t iter = 0;
     block_sector_t *dbl = calloc (1, sizeof (dbl_indir_array));
 //    size_t check_cnt = sectors + 1 + DIV_ROUND_UP (sectors, 128);
@@ -203,6 +206,7 @@ inode_open (block_sector_t sector)
   inode->open_cnt = 1;
   inode->deny_write_cnt = 0;
   inode->removed = false;
+  inode->is_dir = false;
   block_read (fs_device, inode->sector, &inode->data);
   
   inode->dbl = calloc (1, sizeof (dbl_indir_array));

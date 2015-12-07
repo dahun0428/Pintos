@@ -120,7 +120,11 @@ struct thread
     struct list child_list;
     bool on_wait;
     struct child_info * myinfo;
-//    char * cmd_copy;
+
+    /* Pintos #4 */
+
+    char * cur_dir;   /* Absolute path */
+    struct dir *pwd;  /* dir pointer */
   };
 
 struct child_info

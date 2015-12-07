@@ -99,6 +99,7 @@ thread_init (void)
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
+  initial_thread->cur_dir = "/";
   initial_thread->tid = allocate_tid ();
 }
 
@@ -192,6 +193,11 @@ thread_create (const char *name, int priority,
   if (c_info == NULL)
     return TID_ERROR;
 
+  int dir_len = strlen (t->parent->cur_dir);
+  /* need free */
+  t->cur_dir = (char *) calloc (1, dir_len + 1);
+  strlcpy (t->cur_dir, t->parent->cur_dir, dir_len + 1);
+  t->pwd = dir_reopen (t->parent->pwd);
   c_info->child = t;
   c_info->tid = tid;
   c_info->load_success = false;
