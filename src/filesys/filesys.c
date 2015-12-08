@@ -7,6 +7,8 @@
 #include "filesys/inode.h"
 #include "filesys/directory.h"
 #include "filesys/cache.h"
+#include "threads/malloc.h"
+#include "threads/thread.h"
 
 /* Partition that contains the file system. */
 struct block *fs_device;
@@ -30,6 +32,12 @@ filesys_init (bool format)
     do_format ();
 
   free_map_open ();
+
+  struct thread *t = thread_current ();
+  if (!strcmp (t->cur_dir, "/"))
+    t->pwd = dir_open_root ();
+  else
+    t->pwd = dir_reopen (t->parent->pwd);
 }
 
 /* Shuts down the file system module, writing any unwritten data
@@ -45,10 +53,15 @@ filesys_done (void)
    Fails if a file named NAME already exists,
    or if internal memory allocation fails. */
 bool
-filesys_create (const char *name, off_t initial_size) 
+filesys_create (const char *name_, off_t initial_size) 
 {
   block_sector_t inode_sector = 0;
-  struct dir *dir = dir_open_root ();
+  char *name = NULL;
+  struct dir *dir = NULL; //dir_open_root ();
+
+  path_parser (name_, &dir, &name);
+  //printf("full_name: %s\n",name_);
+  //printf("name: %s\n",name);
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size)
@@ -57,6 +70,34 @@ filesys_create (const char *name, off_t initial_size)
     free_map_release (inode_sector, 1);
   dir_close (dir);
 
+  if (name != NULL)
+    free (name);
+  //printf("create %s: %s\n",name, success ? "success" : "fail");
+  return success;
+}
+
+bool
+filesys_mkdir (const char *name_)
+{
+  block_sector_t inode_sector = 0;
+  off_t initial_size = 0;
+  char *name = NULL;
+  struct dir *dir = NULL; //dir_open_root ();
+
+  path_parser (name_, &dir, &name);
+  //printf("name: %s\n",name);
+  bool success = (dir != NULL
+                  && free_map_allocate (1, &inode_sector)
+                  && dir_create (inode_sector, initial_size)
+                  && dir_add (dir, name, inode_sector));
+  if (!success && inode_sector != 0) 
+    free_map_release (inode_sector, 1);
+  dir_close (dir);
+
+  if (name != NULL)
+    free (name);
+
+  //printf("mkdir %s: %s\n",name, success ? "success" : "fail");
   return success;
 }
 
@@ -66,14 +107,22 @@ filesys_create (const char *name, off_t initial_size)
    Fails if no file named NAME exists,
    or if an internal memory allocation fails. */
 struct file *
-filesys_open (const char *name)
+filesys_open (const char *name_)
 {
-  struct dir *dir = dir_open_root ();
+  char *name = NULL;
+  struct dir *dir = NULL; //dir_open_root ();
   struct inode *inode = NULL;
+  struct thread *t = thread_current ();
 
+ // printf("cur: %s and len: %d\n", t->cur_dir, strlen (t->cur_dir));
+  path_parser (name_, &dir, &name);
+  
   if (dir != NULL)
     dir_lookup (dir, name, &inode);
   dir_close (dir);
+
+  if (name != NULL)
+    free (name);
 
   return file_open (inode);
 }
@@ -83,11 +132,21 @@ filesys_open (const char *name)
    Fails if no file named NAME exists,
    or if an internal memory allocation fails. */
 bool
-filesys_remove (const char *name) 
+filesys_remove (const char *name_) 
 {
-  struct dir *dir = dir_open_root ();
+  char *name = NULL;
+  struct dir *dir = NULL; //dir_open_root ();
+
+  if (!strcmp (name_, "/"))
+    return false;
+
+  path_parser (name_, &dir, &name);
+
   bool success = dir != NULL && dir_remove (dir, name);
   dir_close (dir); 
+
+  if (name != NULL)
+    free (name);
 
   return success;
 }
@@ -100,6 +159,9 @@ do_format (void)
   free_map_create ();
   if (!dir_create (ROOT_DIR_SECTOR, 16))
     PANIC ("root directory creation failed");
+  if (!dir_add (dir_open_root (), "/", ROOT_DIR_SECTOR))
+    PANIC ("HOIT");
   free_map_close ();
   printf ("done.\n");
 }
+

@@ -1,3 +1,4 @@
+
 /* Create a very deep "vine" of directories: /dir0/dir1/dir2/...
    and an ordinary file in each of them, until we fill up the
    disk.
@@ -29,14 +30,19 @@ test_main (void)
       char contents[128];
       int fd;
 
+      //printf("current i : %d\n", i);
       /* Create file. */
       snprintf (file_name, sizeof file_name, "file%d", i);
       if (!create (file_name, 0))
+      { 
+        //printf("(create) file_name: %s\n", file_name);
         break;
+      }
       CHECK ((fd = open (file_name)) > 1, "open \"%s\"", file_name);
       snprintf (contents, sizeof contents, "contents %d\n", i);
       if (write (fd, contents, strlen (contents)) != (int) strlen (contents)) 
         {
+          //puts("(write) error");
           CHECK (remove (file_name), "remove \"%s\"", file_name);
           close (fd);
           break;
@@ -47,6 +53,7 @@ test_main (void)
       snprintf (dir_name, sizeof dir_name, "dir%d", i);
       if (!mkdir (dir_name)) 
         {
+          //puts("(mkdir) error");
           CHECK (remove (file_name), "remove \"%s\"", file_name);
           break; 
         }

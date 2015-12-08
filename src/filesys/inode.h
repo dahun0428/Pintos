@@ -20,4 +20,7 @@ void inode_deny_write (struct inode *);
 void inode_allow_write (struct inode *);
 off_t inode_length (const struct inode *);
 
+bool inode_isdir (const struct inode *);
+bool inode_setdir (block_sector_t, bool);
+bool inode_open_only (const struct inode *);
 #endif /* filesys/inode.h */

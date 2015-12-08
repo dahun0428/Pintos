@@ -37,4 +37,9 @@ unsigned sys_tell(int);
 
 void sys_close(int);
 
+bool sys_chdir (const char *);
+bool sys_mkdir (const char *);
+bool sys_readdir (int, char *);
+bool sys_isdir (int);
+int sys_inumber (int);
 #endif /* userprog/syscall.h */

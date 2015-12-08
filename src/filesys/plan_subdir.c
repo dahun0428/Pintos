@@ -59,8 +59,6 @@ System Call: bool chdir (const char *dir)
   The pintos extract and append commands should now accept full path names, assuming that the directories used in the paths have already been created. This should not require any significant extra effort on your part.
 
 The function I will implement:
-  const char * rel2abs (const char *) // relative path to absolute path
-  const char * abs2rel (const char *) // absolute path to relative path, may dir name
   const char * path_parser (const char *) // from given path, find dir name.
   bool path_finder (const char *) 
   or 
@@ -126,14 +124,6 @@ bool mkdir (const char *dir)
 
 }
 
-bool is_absolute_path (const char * path)
-{
-  if (*path == '/')
-    return true;
-
-  return false;
-}
-
 /* parsing path, then return struct dir * to path_dir,
  and file name pointer to file_name */
 void path_parser (const char *path, struct dir **path_dir, char ** file_name)
@@ -154,6 +144,14 @@ void path_parser (const char *path, struct dir **path_dir, char ** file_name)
     strlcpy (split_path, path, strlen(path)); 
   }
   
+  else if (!strcmp (path, "."))
+  {
+    split_path = calloc (1, strlen (t->cur_dir) + 1);
+    if (split_path == NULL)
+      return;
+    strlcpy (split_path, t->cur_dir, strlen(t->cur_dir)); 
+   
+  }
   else 
   {
     split_path = calloc (1, strlen (t->cur_dir) + strlen (path) + 1);
@@ -195,6 +193,7 @@ meet_cur:
   {
     if (!dir_lookup (dir, stack_name[stack_top], &inode))
     {
+      puts("FUCK");
       free (split_path);
       free (*file_name);
       *file_name = NULL;
@@ -209,4 +208,19 @@ meet_cur:
   ASSERT (dir != NULL);
 
   free (split_path);
+}
+
+bool
+dir_isempty (struct inode *inode)
+{
+  struct dir_entry e;
+  off_t ofs;
+  bool success = false;
+
+  for (ofs = 0; inode_read_at (inode, &e, sizeof e, ofs) == sizeof e;
+       ofs += sizeof e) 
+    if (e.in_use)
+      return false;
+
+  return true;
 }

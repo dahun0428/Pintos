@@ -105,7 +105,7 @@ inode_create (block_sector_t sector, off_t length)
     size_t iter = 0;
     block_sector_t *dbl = calloc (1, sizeof (dbl_indir_array));
 //    size_t check_cnt = sectors + 1 + DIV_ROUND_UP (sectors, 128);
-    size_t check_cnt = sectors;
+    //size_t check_cnt = sectors;
     int se_cnt = 0;
 
     if (dbl == NULL)
@@ -206,8 +206,8 @@ inode_open (block_sector_t sector)
   inode->open_cnt = 1;
   inode->deny_write_cnt = 0;
   inode->removed = false;
-  inode->is_dir = false;
   block_read (fs_device, inode->sector, &inode->data);
+  inode->is_dir = inode->data.is_dir;
   
   inode->dbl = calloc (1, sizeof (dbl_indir_array));
   if (inode->dbl == NULL)
@@ -274,11 +274,11 @@ inode_close (struct inode *inode)
       }
       free_map_release (inode->data.dbl_ary, 1); 
       free_map_release (inode->sector, 1);
-      free (inode->dbl);
     }
 
     block_write (fs_device, inode->data.dbl_ary, inode->dbl);
     block_write (fs_device, inode->sector, &inode->data);
+    free (inode->dbl);
     free (inode); 
   }
   buffer_write_behind ();
@@ -487,4 +487,30 @@ off_t
 inode_length (const struct inode *inode)
 {
   return inode->data.length;
+}
+
+
+/* in inode.c */
+bool inode_isdir (const struct inode *inode)
+{
+  return inode->is_dir;
+}
+
+bool inode_setdir (block_sector_t sector, bool isdir)
+{
+  struct inode_disk *disk_inode = calloc (1, sizeof *disk_inode);
+
+  if (disk_inode == NULL)
+    return false;
+
+  block_read (fs_device, sector, disk_inode);
+  disk_inode->is_dir = isdir;
+  block_write (fs_device, sector, disk_inode);
+
+  return true;
+}
+
+bool inode_open_only (const struct inode *inode)
+{
+  return inode->open_cnt == 1;
 }

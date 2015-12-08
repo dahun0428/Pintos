@@ -11,6 +11,9 @@
 #include "userprog/pagedir.h"
 #include "threads/pte.h"
 #include "filesys/cache.h"
+#include "filesys/directory.h"
+#include "filesys/inode.h"
+#include "filesys/filesys.h"
 #include "devices/input.h"
 
 #define ARG1(ESP) ( ( ((void *)ESP + 4)) )
@@ -110,6 +113,31 @@ syscall_handler (struct intr_frame *f )
       sys_close( * (int *)ARG1(esp));
       break;
 
+    case SYS_CHDIR:
+      if(!CHECK_ARG1(esp)) sys_exit(-1);
+      ret = sys_chdir( * (const char **)ARG1(esp));
+      break;
+
+    case SYS_MKDIR:
+      if(!CHECK_ARG1(esp)) sys_exit(-1);
+      ret = sys_mkdir( * (const char **)ARG1(esp));
+      break;
+
+    case SYS_READDIR:
+      if(!CHECK_ARG2(esp)) sys_exit(-1);
+      ret = sys_readdir(* (int *) ARG1(esp),* (char **) ARG2(esp) );
+      break;
+
+    case SYS_ISDIR:
+      if(!CHECK_ARG1(esp)) sys_exit(-1);
+      ret = sys_isdir( * (int *)ARG1(esp));
+      break;
+
+    case SYS_INUMBER:
+      if(!CHECK_ARG1(esp)) sys_exit(-1);
+      ret = sys_inumber( * (int *)ARG1(esp));
+      break;
+
     default:
       sys_exit(-1);
       break;
@@ -192,7 +220,7 @@ bool sys_create (const char *file, unsigned initial_size)
   if(!is_user_vaddr( file )) sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, file)) sys_exit(-1);
 
-  if (file != NULL) 
+  if (file != NULL && strcmp (file, "")) 
     success = filesys_create(file, initial_size);
 
   else sys_exit(-1);
@@ -223,7 +251,8 @@ int sys_open (const char *file)
   if(!is_user_vaddr( file )) sys_exit(-1);
   if(!pagedir_get_page(thread_current()->pagedir, file)) sys_exit(-1);
 
-  if(file == NULL) return -1;
+  if (file == NULL) return -1;
+  if (!strcmp (file, "")) return -1;
 
   fds = calloc(1, sizeof (struct file_des));  
 
@@ -232,21 +261,30 @@ int sys_open (const char *file)
 
   fds->file = filesys_open (file);
 
+
   int fd = 2;
 
 
-  if (fds->file == NULL) return -1;
-
+  if (fds->file == NULL) 
+  {
+    return -1;
+  }
   for ( fd = 2 ; fd < 128; fd++){
-    
     if( t->file_des[fd] == NULL ) break;
-    
   }
 
-  if (fd == 128) return -1;
+  if (fd == 128) 
+  {
+    return -1;
+  }
 
   fds->fd = fd;
   t->file_des[fd] = fds;
+
+  if (inode_isdir (file_get_inode (fds->file)))
+  {
+    fds->dir = dir_open (file_get_inode (fds->file));
+  }
   
   if (strcmp (file, t->name) == 0)
     file_deny_write(t->file_des[fd]->file);
@@ -277,6 +315,8 @@ int sys_read(int fd, void * buffer, unsigned size)
   if ( (fd == 0 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
+  if (sys_isdir (fd))
+    return -1;
 
   if (fd == 0)
     while(size != ret) {
@@ -302,6 +342,9 @@ int sys_write(int fd, const void * buffer, unsigned size)
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
 
   
+  if (sys_isdir (fd))
+    return -1;
+
   if (fd == 1){
     putbuf(buffer, size);
   }
@@ -333,9 +376,50 @@ void sys_close(int fd)
 
   else if ( t->file_des[fd] == NULL ) return;
 
+  if (inode_isdir (file_get_inode (t->file_des[fd]->file)))
+  {
+    dir_close (t->file_des[fd]->dir);
+  }
+
   file_allow_write(t->file_des[fd]->file);
   file_close(t->file_des[fd]->file);
   free(t->file_des[fd]);
   t->file_des[fd] = NULL;
 }
 
+bool sys_chdir (const char *dir)
+{
+  return dir_change (dir);
+}
+
+bool sys_mkdir (const char *dir)
+{
+  return filesys_mkdir (dir);
+}
+
+bool sys_isdir (int fd)
+{
+  struct thread *t = thread_current ();
+  if (t->file_des[fd] != NULL)
+    return (int) inode_isdir (file_get_inode (t->file_des[fd]->file));
+
+  return false;
+}
+
+bool sys_readdir (int fd, char *name)
+{
+  struct thread *t = thread_current ();
+  if (t->file_des[fd]->dir != NULL)
+    return dir_readdir (t->file_des[fd]->dir, name);
+
+  return false;
+}
+
+int sys_inumber (int fd)
+{
+  struct thread *t = thread_current ();
+  if (t->file_des[fd] != NULL)
+    return (int) inode_get_inumber (file_get_inode (t->file_des[fd]->file));
+
+  return -1;
+}

@@ -17,7 +17,8 @@ enum thread_status
 
 struct file_des
 {
-  struct file * file;
+  struct file *file;
+  struct dir *dir;
   int fd;
 };
 

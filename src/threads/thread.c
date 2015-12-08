@@ -12,6 +12,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "filesys/filesys.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -102,6 +103,7 @@ thread_init (void)
   initial_thread->cur_dir = "/";
   initial_thread->tid = allocate_tid ();
 }
+
 
 /* Starts preemptive thread scheduling by enabling interrupts.
    Also creates the idle thread. */
@@ -197,7 +199,6 @@ thread_create (const char *name, int priority,
   /* need free */
   t->cur_dir = (char *) calloc (1, dir_len + 1);
   strlcpy (t->cur_dir, t->parent->cur_dir, dir_len + 1);
-  t->pwd = dir_reopen (t->parent->pwd);
   c_info->child = t;
   c_info->tid = tid;
   c_info->load_success = false;
