@@ -205,7 +205,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   thread_tick ();
   timer_wakeup ();
   
-//  if (ticks % 400 == 0)\
+  //if (ticks % 100 == 0)\
     buffer_write_behind ();
 }
 

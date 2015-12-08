@@ -259,7 +259,7 @@ inode_close (struct inode *inode)
     {
       size_t sectors = bytes_to_sectors(inode->data.length);
       size_t indir_cnt = DIV_ROUND_UP (sectors, SECTOR_ARRAY_MAX), i;
-      indir_array indir;
+      indir_array indir = {0};
 
       for (i = 0; i < indir_cnt; i ++)
       {
@@ -276,8 +276,11 @@ inode_close (struct inode *inode)
       free_map_release (inode->sector, 1);
     }
 
-    block_write (fs_device, inode->data.dbl_ary, inode->dbl);
-    block_write (fs_device, inode->sector, &inode->data);
+    else
+    {
+      block_write (fs_device, inode->data.dbl_ary, inode->dbl);
+      block_write (fs_device, inode->sector, &inode->data);
+    }
     free (inode->dbl);
     free (inode); 
   }
@@ -340,6 +343,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       for (i = 0; i < SECTOR_ARRAY_MAX; i++)
         indir[i] = -1;
       block_write (fs_device, inode->dbl[dbl_idx], &indir);
+      block_write (fs_device, inode->data.dbl_ary, inode->dbl);
     }
 
     else
@@ -446,13 +450,17 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       block_write (fs_device, sector_idx, zeros);
       indir[indir_idx] = sector_idx;
       block_write (fs_device, inode->dbl[dbl_idx], &indir);
+      block_write (fs_device, inode->data.dbl_ary, inode->dbl);
     }
 
     cache_write_at (sector_idx, buffer + bytes_written, sector_ofs, chunk_size);
 
     /* Advance. */
     if (inode_length (inode) < offset + chunk_size)
+    {
       inode->data.length = offset + chunk_size;
+      block_write (fs_device, inode->sector, &inode->data);
+    }
     size -= chunk_size;
     offset += chunk_size;
     bytes_written += chunk_size;
