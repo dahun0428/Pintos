@@ -3,9 +3,11 @@
 Implement a hierarchical name space. In the basic file system, all files live in a single directory. 
 Modify this to allow directory entries to point to files or to other directories.
 "pointer at dir, inode? where?"
+"I did"
 
 Make sure that directories can expand beyond their original size just as any other file can.
 "ok"
+"I did"
 
 The basic file system has a 14-character limit on file names. You may retain this limit for individual file name components, or may extend it, at your option. You must allow full path names to be much longer than 14 characters.
 "full path: absoulte or relative? if relative, what should I save more?"

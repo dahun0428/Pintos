@@ -260,10 +260,7 @@ int sys_open (const char *file)
     sys_exit(-1);
 
   fds->file = filesys_open (file);
-
-
   int fd = 2;
-
 
   if (fds->file == NULL) 
   {
@@ -394,6 +391,7 @@ bool sys_chdir (const char *dir)
 
 bool sys_mkdir (const char *dir)
 {
+  if (!strcmp (dir, "")) return false;
   return filesys_mkdir (dir);
 }
 
@@ -409,7 +407,7 @@ bool sys_isdir (int fd)
 bool sys_readdir (int fd, char *name)
 {
   struct thread *t = thread_current ();
-  if (t->file_des[fd]->dir != NULL)
+  if (t->file_des[fd] != NULL && t->file_des[fd]->dir != NULL)
     return dir_readdir (t->file_des[fd]->dir, name);
 
   return false;

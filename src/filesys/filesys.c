@@ -117,6 +117,13 @@ filesys_open (const char *name_)
  // printf("cur: %s and len: %d\n", t->cur_dir, strlen (t->cur_dir));
   path_parser (name_, &dir, &name);
   
+//  printf("name: %s\n",name);
+  if (dir != NULL && !strcmp (name, "/"))
+  {
+    dir_close (dir);
+    return file_open (inode_open (ROOT_DIR_SECTOR));
+  }
+
   if (dir != NULL)
     dir_lookup (dir, name, &inode);
   dir_close (dir);
@@ -141,7 +148,8 @@ filesys_remove (const char *name_)
     return false;
 
   path_parser (name_, &dir, &name);
-
+  
+  //printf("path: %s, name: %s\n",name_,name);
   bool success = dir != NULL && dir_remove (dir, name);
   dir_close (dir); 
 
@@ -159,7 +167,7 @@ do_format (void)
   free_map_create ();
   if (!dir_create (ROOT_DIR_SECTOR, 16))
     PANIC ("root directory creation failed");
-  if (!dir_add (dir_open_root (), "/", ROOT_DIR_SECTOR))
+//  if (!dir_add (dir_open_root (), "/", ROOT_DIR_SECTOR))\
     PANIC ("HOIT");
   free_map_close ();
   printf ("done.\n");

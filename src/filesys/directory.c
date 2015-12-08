@@ -213,6 +213,9 @@ dir_remove (struct dir *dir, const char *name)
   if (inode_isdir (inode) && !dir_isempty (inode))
     goto done;
 
+  if (inode_isdir (inode) && !inode_open_only (inode))
+    goto done;
+
   /* Erase directory entry. */
   e.in_use = false;
   if (inode_write_at (dir->inode, &e, sizeof e, ofs) != sizeof e) 
@@ -331,8 +334,19 @@ void path_parser (const char *path, struct dir **path_dir, char ** file_name)
 meet_cur:
     token = strtok_r (NULL, "/", &ptr);
   }
+  //printf("stack_top: %d\n",stack_top);
 
-  //  *path_dir = dir;
+  /* path: "/" */
+  if (stack_top == -1 )
+  {
+    //printf("stack_top: %d\n",stack_top);
+    free (split_path);
+    *file_name = calloc (1, strlen ("/") + 1);
+    strlcpy (*file_name, "/", strlen ("/") + 1);
+    *path_dir = dir;
+    return ;
+  }
+
   *file_name = calloc (1, strlen (stack_name[stack_top]) + 1); 
   //printf ("stack_name: %s\n", stack_name[stack_top]);
   strlcpy (*file_name, stack_name[stack_top], strlen (stack_name[stack_top]) + 1);
@@ -350,6 +364,7 @@ meet_cur:
       free (*file_name);
       *file_name = NULL;
       *path_dir = NULL;
+      dir_close (dir);
       return;
     }
     dir_close (dir);
@@ -407,11 +422,24 @@ bool dir_change (const char *path)
     return false;
   }
 
+  if (dir != NULL && !strcmp (name, "/"))
+  {
+    free (t->cur_dir);
+    t->cur_dir = calloc (1, strlen (name) + 1);
+    strlcpy (t->cur_dir, name, strlen (name) + 1);
+    free (new_path);
+    free (name);
+    dir_close (t->pwd);
+    t->pwd = dir;
+    return true;
+  }
+
   struct inode *inode = NULL;
 
   if (!dir_lookup (dir, name, &inode))
   {
     free (new_path);
+    free (dir);
     return false;
   }
 

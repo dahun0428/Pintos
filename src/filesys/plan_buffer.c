@@ -32,3 +32,18 @@ You should also implement read-ahead, that is, automatically fetch the next bloc
 "after indexing maybe?"
 
 We recommend integrating the cache into your design early. In the past, many groups have tried to tack the cache onto a design late in the design process. This is very difficult. These groups have often turned in projects that failed most or all of the tests.
+
+
+
+
+
+
+
+void thread_fun (void * aux)
+{
+
+
+}
+
+
+

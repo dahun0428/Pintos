@@ -512,5 +512,6 @@ bool inode_setdir (block_sector_t sector, bool isdir)
 
 bool inode_open_only (const struct inode *inode)
 {
-  return inode->open_cnt == 1;
+  //printf("open_cnt: %d\n",inode->open_cnt);
+  return inode->open_cnt <= 2;
 }
