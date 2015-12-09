@@ -6,6 +6,7 @@
 #include "filesys/filesys.h"
 #include "filesys/free-map.h"
 #include "filesys/cache.h"
+#include "threads/thread.h"
 #include "threads/malloc.h"
 
 /* Identifies an inode. */
@@ -30,6 +31,7 @@ typedef block_sector_t indir_array[SECTOR_ARRAY_MAX];
 
 typedef indir_array dbl_indir_array;
   
+static void inode_read_ahead (const struct inode *, block_sector_t, block_sector_t);
 
 /* Returns the number of sectors to allocate for an inode SIZE
    bytes long. */
@@ -56,7 +58,7 @@ struct inode
    within INODE.
    Returns -1 if INODE does not contain data for a byte at offset
    POS. */
-static block_sector_t
+/*static block_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) 
 {
   ASSERT (inode != NULL);
@@ -64,7 +66,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
     return pos / BLOCK_SECTOR_SIZE;
   else
     return -1;
-}
+}*/
 
 /* List of open inodes, so that opening a single inode twice
    returns the same `struct inode'. */
@@ -265,7 +267,7 @@ inode_close (struct inode *inode)
       {
         size_t j;
         block_read (fs_device, inode->dbl[i], &indir);
-        for (j = 0; j < SECTOR_ARRAY_MAX && sectors > 0; j++)
+        for (j = 0; j < SECTOR_ARRAY_MAX && sectors > 0 ; j++)
         {
           free_map_release (indir[j], 1);
           sectors--;
@@ -280,11 +282,11 @@ inode_close (struct inode *inode)
     {
       block_write (fs_device, inode->data.dbl_ary, inode->dbl);
       block_write (fs_device, inode->sector, &inode->data);
+      buffer_write_behind ();
     }
     free (inode->dbl);
     free (inode); 
   }
-  buffer_write_behind ();
 }
 
 /* Marks INODE to be deleted when it is closed by the last caller who
@@ -365,7 +367,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
 
 
     cache_read_at (sector_idx, buffer + bytes_read, sector_ofs, chunk_size);
-
+    inode_read_ahead (inode, dbl_idx, indir_idx);
     /* Advance. */
     size -= chunk_size;
     offset += chunk_size;
@@ -441,7 +443,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     if (chunk_size <= 0)
       break;
 
-    /* read in file extension */
+    /* write in file extension */
     if (inode_left <= 0 && sector_idx == -1)
     {
       static char zeros[BLOCK_SECTOR_SIZE];
@@ -455,6 +457,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 
     cache_write_at (sector_idx, buffer + bytes_written, sector_ofs, chunk_size);
 
+//    buffer_write_behind ();
     /* Advance. */
     if (inode_length (inode) < offset + chunk_size)
     {
@@ -522,4 +525,49 @@ bool inode_open_only (const struct inode *inode)
 {
   //printf("open_cnt: %d\n",inode->open_cnt);
   return inode->open_cnt <= 2;
+}
+
+static void ahead_read_func (void *);
+
+static void inode_read_ahead (const struct inode *inode, block_sector_t dbl_idx_, block_sector_t indir_idx_)
+{
+  block_sector_t dbl_idx = dbl_idx_;
+  block_sector_t indir_idx = indir_idx_;
+  if (indir_idx + 1 == SECTOR_ARRAY_MAX)
+  {
+    indir_idx = 0;
+    dbl_idx++;
+  }
+  
+  if (inode->dbl[dbl_idx] != -1)
+  { 
+    indir_array indir = {0};
+    block_read (fs_device, inode->dbl[dbl_idx], &indir);
+    
+    if (indir[0] != -1)
+    {
+      static block_sector_t idx;
+      idx = indir[0];
+      thread_create ("read-ahead", PRI_DEFAULT, ahead_read_func, &idx);
+    }
+  }
+}
+
+static void 
+ahead_read_func (void *aux)
+{
+  char *buf = malloc (10);
+  block_sector_t idx = *(int *)aux;
+  struct thread *t = thread_current ();
+
+  if (buf == NULL)
+    return;
+
+  cache_read_at (idx, buf, 0, 1);
+  free (buf);
+  free (aux);
+
+  free (t->myinfo);
+  free (t->cur_dir);
+  thread_exit ();
 }

@@ -15,6 +15,7 @@
 #include "filesys/inode.h"
 #include "filesys/filesys.h"
 #include "devices/input.h"
+#include "devices/block.h"
 
 #define ARG1(ESP) ( ( ((void *)ESP + 4)) )
 #define ARG2(ESP) ( ( ((void *)ESP + 8)) )
@@ -188,6 +189,7 @@ void sys_exit(int status)
     }
 
   buffer_write_behind ();
+  free (cur->cur_dir);
   
   printf ("%s: exit(%d)\n", thread_name() ,status);
   lock_release(&cur->myinfo->child_lock);

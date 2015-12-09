@@ -1,6 +1,11 @@
 #include <string.h>
 #include <debug.h>
 
+static void
+FUCKING (void)
+{
+  puts("FUCK");
+}
 /* Copies SIZE bytes from SRC to DST, which must not overlap.
    Returns DST. */
 void *
@@ -13,7 +18,11 @@ memcpy (void *dst_, const void *src_, size_t size)
   ASSERT (src != NULL || size == 0);
 
   while (size-- > 0)
+  {
     *dst++ = *src++;
+//    if (*(int *)src == 0xc003e4c8)\
+      FUCKING ();
+  }
 
   return dst_;
 }

@@ -135,6 +135,7 @@ block_write (struct block *block, block_sector_t sector, const void *buffer)
 {
   check_sector (block, sector);
   ASSERT (block->type != BLOCK_FOREIGN);
+
   block->ops->write (block->aux, sector, buffer);
   block->write_cnt++;
 }
