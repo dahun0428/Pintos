@@ -493,6 +493,30 @@ inode_allow_write (struct inode *inode)
   inode->deny_write_cnt--;
 }
 
+static void inode_read_ahead (const struct inode *inode, block_sector_t dbl_idx_, block_sector_t indir_idx_)
+{
+  block_sector_t dbl_idx = dbl_idx_;
+  block_sector_t indir_idx = indir_idx_;
+  if (indir_idx + 1 == SECTOR_ARRAY_MAX)
+  {
+    indir_idx = 0;
+    dbl_idx++;
+  }
+  
+  if (inode->dbl[dbl_idx] != -1)
+  { 
+    indir_array indir = {0};
+    block_read (fs_device, inode->dbl[dbl_idx], &indir);
+    
+    if (indir[0] != -1)
+    {
+      static block_sector_t idx;
+      idx = indir[0];
+      //thread_create ("read-ahead", PRI_DEFAULT, ahead_read_func, &idx);
+    }
+  }
+}
+
 /* Returns the length, in bytes, of INODE's data. */
 off_t
 inode_length (const struct inode *inode)
@@ -529,29 +553,6 @@ bool inode_open_only (const struct inode *inode)
 
 static void ahead_read_func (void *);
 
-static void inode_read_ahead (const struct inode *inode, block_sector_t dbl_idx_, block_sector_t indir_idx_)
-{
-  block_sector_t dbl_idx = dbl_idx_;
-  block_sector_t indir_idx = indir_idx_;
-  if (indir_idx + 1 == SECTOR_ARRAY_MAX)
-  {
-    indir_idx = 0;
-    dbl_idx++;
-  }
-  
-  if (inode->dbl[dbl_idx] != -1)
-  { 
-    indir_array indir = {0};
-    block_read (fs_device, inode->dbl[dbl_idx], &indir);
-    
-    if (indir[0] != -1)
-    {
-      static block_sector_t idx;
-      idx = indir[0];
-      thread_create ("read-ahead", PRI_DEFAULT, ahead_read_func, &idx);
-    }
-  }
-}
 
 static void 
 ahead_read_func (void *aux)
@@ -565,7 +566,6 @@ ahead_read_func (void *aux)
 
   cache_read_at (idx, buf, 0, 1);
   free (buf);
-  free (aux);
 
   free (t->myinfo);
   free (t->cur_dir);
