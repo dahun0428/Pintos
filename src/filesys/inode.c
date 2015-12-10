@@ -32,6 +32,7 @@ typedef block_sector_t indir_array[SECTOR_ARRAY_MAX];
 typedef indir_array dbl_indir_array;
   
 static void inode_read_ahead (const struct inode *, block_sector_t, block_sector_t);
+static void ahead_read_func (void *);
 
 /* Returns the number of sectors to allocate for an inode SIZE
    bytes long. */
@@ -367,7 +368,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
 
 
     cache_read_at (sector_idx, buffer + bytes_read, sector_ofs, chunk_size);
-    inode_read_ahead (inode, dbl_idx, indir_idx);
+    //inode_read_ahead (inode, dbl_idx, indir_idx);
     /* Advance. */
     size -= chunk_size;
     offset += chunk_size;
@@ -512,7 +513,7 @@ static void inode_read_ahead (const struct inode *inode, block_sector_t dbl_idx_
     {
       static block_sector_t idx;
       idx = indir[0];
-      //thread_create ("read-ahead", PRI_DEFAULT, ahead_read_func, &idx);
+      thread_create ("read-ahead", PRI_DEFAULT, ahead_read_func, &idx);
     }
   }
 }
@@ -542,6 +543,8 @@ bool inode_setdir (block_sector_t sector, bool isdir)
   disk_inode->is_dir = isdir;
   block_write (fs_device, sector, disk_inode);
 
+  free (disk_inode);
+
   return true;
 }
 
@@ -551,7 +554,6 @@ bool inode_open_only (const struct inode *inode)
   return inode->open_cnt <= 2;
 }
 
-static void ahead_read_func (void *);
 
 
 static void 
