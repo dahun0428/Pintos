@@ -18,7 +18,7 @@
    Must be exactly BLOCK_SECTOR_SIZE bytes long. */
 struct inode_disk
   {
-    block_sector_t dbl_ary;               /* First data sector. */
+    block_sector_t dbl_ary;               /* doublely index data sector. */
     off_t length;                       /* File size in bytes. */
     unsigned magic;                     /* Magic number. */
     bool is_dir;                        /* true if dir */
@@ -368,7 +368,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
 
 
     cache_read_at (sector_idx, buffer + bytes_read, sector_ofs, chunk_size);
-    //inode_read_ahead (inode, dbl_idx, indir_idx);
+    //printf("(read)" inode_read_ahead (inode, dbl_idx, indir_idx);
     /* Advance. */
     size -= chunk_size;
     offset += chunk_size;

@@ -339,7 +339,6 @@ int sys_write(int fd, const void * buffer, unsigned size)
   if(!pagedir_get_page(thread_current()->pagedir, buffer)) sys_exit(-1);
   if ( (fd == 1 || (2 <= fd && fd <128) ) ==0) return -1;
   if ( fd >1 && t->file_des[fd] == NULL) return -1;
-
   
   if (sys_isdir (fd))
     return -1;

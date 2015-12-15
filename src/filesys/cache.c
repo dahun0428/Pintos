@@ -81,10 +81,8 @@ buffer_cache_idx buffer_evict_cache (void)
         buffer_write_single (i);
         set_buffer_dirty (cache_list[i], false);
       }
-
     }
   }
-
 
   return idx;
 }
